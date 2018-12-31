@@ -1,0 +1,41 @@
+{
+  "name": "node-eufy-api",
+  "version": "0.0.1",
+  "description": "A simple JavaScript API to control eufy smart light bulbs, switches and plugs.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build:proto": "protoc --proto_path=./ --js_out=import_style=commonjs,binary:. src/lakeside.proto",
+    "build:proto_cp": "cp ./src/lakeside_pb.js ./lib/",
+    "build:tsc": "./node_modules/.bin/tsc",
+    "build": "npm run build:proto && npm run build:tsc && npm run build:proto_cp",
+    "cli": "node lib/cli.js"
+  },
+  "author": "Sebastian Moser <sebastian.moser@gmail.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sebmos/node-eufy-api.git"
+  },
+  "bugs": {
+    "url": "http://github.com/sebmos/node-eufy-api/issues"
+  },
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "0.0.43",
+    "@types/node": "^10.12.18",
+    "@types/node-fetch": "^2.1.4",
+    "ts-loader": "^5.3.2",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "bufferpack": "0.0.6",
+    "chalk": "^2.4.1",
+    "google-protobuf": "^3.6.1",
+    "inquirer": "^6.2.1",
+    "node-fetch": "^2.3.0"
+  }
+}
