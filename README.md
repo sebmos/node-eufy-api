@@ -3,6 +3,21 @@ A simple JavaScript API to control [eufy's](https://www.eufylife.com/) smart lig
 
 This project is not developed, supported or endorsed by eufy.
 
+## Supported Devices
+|Device Code|Device Name|Comment|
+|--|--|--|
+|T1201|[Smart Plug](https://www.amazon.com/dp/B071J5DW8N?tag=sebmos-20)|Untested|
+|T1202|[Smart Plug Mini](https://www.amazon.com/dp/B07177XC24?tag=sebmos-20)|Untested|
+|T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
+|T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|
+|T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)|Untested|
+|T1012|[Lumos Smart Bulb - Tunable White](https://www.amazon.com/dp/B07177X95T?tag=sebmos-20)|Untested|
+|T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)|Untested|
+
+All devices listed above should work, since they are supported in /python-lakeside/. Because an error might have occurred during the porting process, some are marked as *untested*.
+
+If you own one of these untested devices, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
+
 ## Usage
 ### About eufy API
 It is necessary to connect and authenticate with eufy's API to identify the device model, code and IP address. With this information, devices can be controlled directly, without connecting to eufy's API.
@@ -13,6 +28,9 @@ Since the devices are controlled through a local socket connection, node-eufy-ap
 Run `node run cli`
 
 After authenticating, this command lists all available eufy devices, models, codes & IP addresses and lets you control them.
+
+### What is my device's model, code and IP address?
+To identify the devices you have, as well as their models, codes and IP addresses, use the [command-line interface](#command-line-interface) or run the `loadDevices(email: string, password: string): Promise<Device[]>` function.
 
 ### API
 Add the node-eufy-api package to your project:
@@ -245,24 +263,6 @@ if (lightBulb.supportsColors()) {
 	});
 }
 ```
-
-## Supported Devices
-|Device Code|Device Name|Comment|
-|--|--|--|
-|T1201|[Smart Plug](https://www.amazon.com/dp/B071J5DW8N?tag=sebmos-20)|Untested|
-|T1202|[Smart Plug Mini](https://www.amazon.com/dp/B07177XC24?tag=sebmos-20)|Untested|
-|T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
-|T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|
-|T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)|Untested|
-|T1012|[Lumos Smart Bulb - Tunable White](https://www.amazon.com/dp/B07177X95T?tag=sebmos-20)|Untested|
-|T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)|Untested|
-
-All devices listed above should work, since they are supported in /python-lakeside/. Because an error might have occurred during the porting process, some are marked as *untested*.
-
-If you own one of these untested devices, please consider running the [command-line interface](#cli) and open an issue to confirm whether or not they work.
-
-### What is my device's model, code and IP address?
-To identify the devices you have, as well as their models, codes and IP addresses, use the [command-line interface](#cli) or run the `loadDevices(email: string, password: string): Promise<Device[]>` function.
 
 ##  Unsupported
 * Energy Reporting
