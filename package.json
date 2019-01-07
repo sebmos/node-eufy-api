@@ -28,7 +28,6 @@
     "@types/inquirer": "0.0.43",
     "@types/node": "^10.12.18",
     "@types/node-fetch": "^2.1.4",
-    "ts-loader": "^5.3.2",
     "typescript": "^3.2.2"
   },
   "dependencies": {
