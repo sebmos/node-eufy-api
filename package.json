@@ -9,7 +9,7 @@
     "build:proto": "protoc --proto_path=./ --js_out=import_style=commonjs,binary:. src/lakeside.proto",
     "build:proto_cp": "cp ./src/lakeside_pb.js ./lib/",
     "build:tsc": "./node_modules/.bin/tsc",
-    "build": "npm run build:proto && npm run build:tsc && npm run build:proto_cp",
+    "build": "npm run build:tsc && npm run build:proto_cp",
     "cli": "node lib/cli.js"
   },
   "author": "Sebastian Moser <sebastian.moser@gmail.com>",
