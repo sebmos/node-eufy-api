@@ -13,7 +13,7 @@
     "cli": "node lib/cli.js"
   },
   "author": "Sebastian Moser <sebastian.moser@gmail.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/sebmos/node-eufy-api.git"
