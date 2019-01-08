@@ -25,7 +25,7 @@ It is necessary to connect and authenticate with eufy's API to identify the devi
 Since the devices are controlled through a local socket connection, node-eufy-api needs to run on the same WiFi network as the devices.
 
 ### Command-line Interface
-Run `node run cli`
+Run `npm run cli`
 
 After authenticating, this command lists all available eufy devices, models, codes & IP addresses and lets you control them.
 
