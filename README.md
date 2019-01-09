@@ -6,7 +6,7 @@ This project is not developed, supported or endorsed by eufy.
 ## Supported Devices
 |Device Code|Device Name|Comment|
 |--|--|--|
-|T1201|[Smart Plug](https://www.amazon.com/dp/B071J5DW8N?tag=sebmos-20)|Untested|
+|T1201|[Smart Plug](https://www.amazon.com/dp/B071J5DW8N?tag=sebmos-20)||
 |T1202|[Smart Plug Mini](https://www.amazon.com/dp/B07177XC24?tag=sebmos-20)|Untested|
 |T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
 |T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|

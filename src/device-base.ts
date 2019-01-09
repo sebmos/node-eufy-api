@@ -27,13 +27,17 @@ export enum DeviceType {
 
 export const getTypeForModel = (model: Model | string): DeviceType => {
 	switch (model) {
-		case Model.T1201, Model.T1202, Model.T1203:
+		case Model.T1201:
+		case Model.T1202:
+		case Model.T1203:
 			return DeviceType.POWER_PLUG;
 
 		case Model.T1211:
 			return DeviceType.SWITCH;
 
-		case Model.T1011, Model.T1012, Model.T1013:
+		case Model.T1011:
+		case Model.T1012:
+		case Model.T1013:
 			return DeviceType.LIGHT_BULB;
 
 		default:
