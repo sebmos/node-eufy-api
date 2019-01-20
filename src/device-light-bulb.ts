@@ -25,24 +25,34 @@ export class LightBulb extends AbstractDevice {
 
 	async loadCurrentState(): Promise<void> {
 		const response = await this.getState();
-		const info = response.getBulbinfo().getPacket().getInfo();
+		if (isWhiteLightBulb(this.model)) {
+			const bulbState = response.getBulbinfo().getPacket().getBulbstate();
 
-		this.power = info.getPower() === 1;
-		if (info.getColor() === 1) {
+			this.power = bulbState.getPower() === 1;
 			this.state = {
-				brightness: info.getColors().getBrightness(),
-				temperature: 50,
-				colors: {
-					red: info.getColors().getRed(),
-					green: info.getColors().getGreen(),
-					blue: info.getColors().getBlue()
-				}
+				brightness: bulbState.getValues().getBrightness(),
+				temperature: bulbState.getValues().getTemperature()
 			};
 		} else {
-			this.state = {
-				brightness: info.getValues().getBrightness(),
-				temperature: info.getValues().getTemperature()
-			};
+			const info = response.getBulbinfo().getPacket().getInfo();
+	
+			this.power = info.getPower() === 1;
+			if (info.getColor() === 1) {
+				this.state = {
+					brightness: info.getColors().getBrightness(),
+					temperature: 50,
+					colors: {
+						red: info.getColors().getRed(),
+						green: info.getColors().getGreen(),
+						blue: info.getColors().getBlue()
+					}
+				};
+			} else {
+				this.state = {
+					brightness: info.getValues().getBrightness(),
+					temperature: info.getValues().getTemperature()
+				};
+			}
 		}
 	}
 
