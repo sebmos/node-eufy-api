@@ -160,7 +160,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 (async () => {
 	let devices: Device[];
 	try {
-		devices = await prompt([
+		const { email, password } = await prompt([
 			{
 				type: 'input',
 				name: 'email',
@@ -171,8 +171,9 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				name: 'password',
 				message: 'Eufy account password'
 			}
-		]).then(({ email, password }: { email: string, password: string }) =>
-			loadDevices(email, password));
+		]);
+
+		devices = await loadDevices(email, password);
 	} catch (e) {
 		log.error(e.message);
 		return;
