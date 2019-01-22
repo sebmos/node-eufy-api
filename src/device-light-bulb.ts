@@ -61,7 +61,7 @@ export class LightBulb extends AbstractDevice {
 		if (typeof value === 'number') {
 			newValue = value;
 		} else {
-			newValue = parseInt(value, 2);
+			newValue = parseInt(value, 10);
 		}
 
 		if (isNaN(newValue) || newValue < 0 || newValue > maxValue) {

@@ -48,21 +48,21 @@ const deviceMenu = async (device: Device): Promise<void> => {
 		menuOptions.push({
 			name: `Change brightness (currently ${device.getBrightness()}/100)`,
 			value: 'brightness',
-			disabled: device.isPowerOn() ? 'Turn on first' : undefined
+			disabled: device.isPowerOn() ? undefined : 'Turn on first'
 		});
 	}
 	if (device.supportsTemperature()) {
 		menuOptions.push({
 			name: `Change color temperature (currently ${device.getTemperature()}/100)`,
 			value: 'temperature',
-			disabled: device.isPowerOn() ? 'Turn on first' : undefined
+			disabled: device.isPowerOn() ? undefined : 'Turn on first'
 		});
 	}
 	if (device.supportsColors()) {
 		menuOptions.push({
 			name: `Change color`,
 			value: 'color',
-			disabled: device.isPowerOn() ? 'Turn on first' : undefined
+			disabled: device.isPowerOn() ? undefined : 'Turn on first'
 		});
 	}
 	menuOptions.push({
@@ -90,7 +90,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				name: 'newBrightness',
 				message: 'Enter brightness (between 0 and 100)',
 				validate: (value: string) => {
-					const number = parseInt(value, 2);
+					const number = parseInt(value, 10);
 					if (number === NaN || number < 0 || number > 100) {
 						return 'Please enter a number between 0 and 100';
 					} else {
@@ -99,7 +99,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const updatedBrightness = await device.setBrightness(parseInt(newBrightness, 2));
+			const updatedBrightness = await device.setBrightness(parseInt(newBrightness, 10));
 			log.success(`Brightness is now ${Math.round(updatedBrightness)}`);
 
 			break;
@@ -110,7 +110,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				name: 'newTemperature',
 				message: 'Enter brightness (between 0 and 100)',
 				validate: (value: string) => {
-					const number = parseInt(value, 2);
+					const number = parseInt(value, 10);
 					if (number === NaN || number < 0 || number > 100) {
 						return 'Please enter a number between 0 and 100';
 					} else {
@@ -119,7 +119,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 2));
+			const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 10));
 			log.success(`Temperature is now ${Math.round(updatedTemperature)}`);
 
 			break;
@@ -134,7 +134,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 					if (colors.length !== 3) {
 						return 'Please provide the three values separated with a "\"';
 					} else if (colors.find((color: string) => {
-						const number = parseInt(color, 2);
+						const number = parseInt(color, 10);
 						return number === NaN || number < 0 || number > 255;
 					})) {
 						return 'The numbers should be between 0 and 255';
@@ -144,7 +144,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const newColorsParsed = newColors.split('/').map((v: string) => parseInt(v, 2));
+			const newColorsParsed = newColors.split('/').map((v: string) => parseInt(v, 10));
 			const updatedColor = await device.setRgbColors(newColorsParsed[0], newColorsParsed[1], newColorsParsed[2]);
 			log.success(`Colors are now ${updatedColor.red}/${updatedColor.green}/${updatedColor.blue}`);
 
