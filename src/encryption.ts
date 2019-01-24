@@ -14,7 +14,7 @@ export const encryptPacket = (rawPacket: Uint8Array): Buffer => {
 	const cipher = crypto.createCipheriv('aes-128-cbc', keyBytes, ivBytes);
 	const encrypted = cipher.update(extendedRawPacket);
 
-	return new Buffer(encrypted);
+	return Buffer.from(encrypted);
 };
 
 export const decryptResponse = (encryptedData: Buffer): Buffer => {
@@ -23,5 +23,5 @@ export const decryptResponse = (encryptedData: Buffer): Buffer => {
 
 	const buffer = cipher.update(encryptedData);
 
-	return new Buffer(buffer);
+	return Buffer.from(buffer);
 };
