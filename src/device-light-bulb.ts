@@ -111,28 +111,25 @@ export class LightBulb extends AbstractDevice {
 		if (isWhiteLightBulb(this.model)) {
 			packet = new lakeside.T1012Packet();
 
-			const bulbInfo = new lakeside.BulbInfo();
-			bulbInfo.setType(0);
+			packet.setBulbinfo(new lakeside.BulbInfo());
+			packet.getBulbinfo().setType(0);
 
-			const bulbPacket = new lakeside.BulbPacket();
-			bulbInfo.setPacket(bulbPacket);
-			bulbPacket.setUnknown1(100);
+			packet.getBulbinfo().setPacket(new lakeside.BulbPacket());
+			packet.getBulbinfo().getPacket().setUnknown1(100);
 
-			const bulbState = new lakeside.BulbState();
-			bulbPacket.setBulbset(bulbState);
-			bulbState.setCommand(7);
+			packet.getBulbinfo().getPacket().setBulbset(new lakeside.BulbState());
+			packet.getBulbinfo().getPacket().getBulbset().setCommand(7);
 
-			const bulbValues = new lakeside.BulbValues();
-			bulbState.setValues(bulbValues);
+			packet.getBulbinfo().getPacket().getBulbset().setValues(new lakeside.BulbValues());
 
 			if (options.power !== undefined) {
-				bulbState.setPower(options.power ? 1 : 0);
+				packet.getBulbinfo().getPacket().getBulbset().setPower(options.power ? 1 : 0);
 			}
 			if (newBrightness !== undefined) {
-				bulbValues.setBrightness(newBrightness);
+				packet.getBulbinfo().getPacket().getBulbset().getValues().setBrightness(newBrightness);
 			}
 			if (newTemperature !== undefined) {
-				bulbValues.setBrightness(newTemperature);
+				packet.getBulbinfo().getPacket().getBulbset().getValues().setTemperature(newTemperature);
 			}
 		} else {
 			packet = new lakeside.T1013Packet();
