@@ -10,15 +10,23 @@ This project is not developed, supported or endorsed by eufy.
 |T1202|[Smart Plug Mini](https://www.amazon.com/dp/B07177XC24?tag=sebmos-20)|Untested|
 |T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
 |T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|
-|T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)|Untested|
+|T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)||
 |T1012|[Lumos Smart Bulb - Tunable White](https://www.amazon.com/dp/B07177X95T?tag=sebmos-20)|Untested|
 |T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)|Untested|
 
 All devices listed above should work, since they are supported in /python-lakeside/. Because an error might have occurred during the porting process, some are marked as *untested*.
 
-If you own one of these untested devices, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
+If you own one of these untested, or any new  devices that aren't listed, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
 
 ## Usage
+### Installation
+Add the node-eufy-api package to your project:
+```
+npm install node-eufy-api --save
+```
+
+The package provides access to the functions `loadDevices` and `createDevice`, as well as several TypeScript interfaces. The [API Reference](#api-reference) section below contains details about the API.
+
 ### About eufy API
 It is necessary to connect and authenticate with eufy's API to identify the device model, code and IP address. With this information, devices can be controlled directly, without connecting to eufy's API.
 
@@ -32,13 +40,13 @@ After authenticating, this command lists all available eufy devices, models, cod
 ### What is my device's model, code and IP address?
 To identify the devices you have, as well as their models, codes and IP addresses, use the [command-line interface](#command-line-interface) or run the `loadDevices(email: string, password: string): Promise<Device[]>` function.
 
-### API
-Add the node-eufy-api package to your project:
-```
-npm install node-eufy-api --save
-```
+## Troubleshooting
 
-The package provides access to the functions `loadDevices` and `createDevice`, as well as several TypeScript interfaces. Use the fields below to identify device types and their features.
+* Try restarting (unplugging & replugging) the device.
+* Try pinging the device's IP address from the computer this code is running from.
+* To verify what WiFi network the device is on, look in the device settings in the EufyHome app.
+
+## API Reference
 
 #### `loadDevices(email: string, password: string): Promise<Device[]>`
 Loads devices connected to the provided eufy account.
