@@ -152,6 +152,7 @@ export class LightBulb extends AbstractDevice {
 			if (options.power !== undefined) {
 				packet.getBulbinfo().getPacket().getControl().setPower(options.power ? 1 : 0);
 			}
+
 			if (newColors) {
 				const colors = new lakeside.T1013Color();
 				colors.setRed(newColors.red);
@@ -180,7 +181,6 @@ export class LightBulb extends AbstractDevice {
 
 				packet.getBulbinfo().getPacket().getControl().setColor(0);
 				packet.getBulbinfo().getPacket().getControl().setValues(values);
-				packet.getBulbinfo().getPacket().getControl().setPower(options.power ? 1 : 0);
 			}
 		}
 
