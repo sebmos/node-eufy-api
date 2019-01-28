@@ -44,20 +44,33 @@ const deviceMenu = async (device: Device): Promise<void> => {
 		name: `Turn ${device.isPowerOn() ? 'off' : 'on'}`,
 		value: 'power'
 	}];
+
 	if (device.supportsBrightness()) {
-		menuOptions.push({
-			name: `Change brightness (currently ${device.getBrightness()}/100)`,
-			value: 'brightness',
-			disabled: device.isPowerOn() ? undefined : 'Turn on first'
-		});
+		const brightnessOption: objects.ChoiceOption = {
+			name: 'Change brightness',
+			value: 'brightness'
+		};
+		if (device.isPowerOn()) {
+			brightnessOption.name += ` (currently ${device.getBrightness()}/100)`;
+		} else {
+			brightnessOption.disabled = 'Turn on first';
+		}
+		menuOptions.push(brightnessOption);
 	}
+
 	if (device.supportsTemperature()) {
-		menuOptions.push({
-			name: `Change color temperature (currently ${device.getTemperature()}/100)`,
-			value: 'temperature',
-			disabled: device.isPowerOn() ? undefined : 'Turn on first'
-		});
+		const temperatureOption: objects.ChoiceOption = {
+			name: 'Change temperature',
+			value: 'temperature'
+		};
+		if (device.isPowerOn()) {
+			temperatureOption.name += ` (currently ${device.getTemperature()}/100)`;
+		} else {
+			temperatureOption.disabled = 'Turn on first';
+		}
+		menuOptions.push(temperatureOption);
 	}
+
 	if (device.supportsColors()) {
 		menuOptions.push({
 			name: `Change color`,
@@ -65,6 +78,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 			disabled: device.isPowerOn() ? undefined : 'Turn on first'
 		});
 	}
+
 	menuOptions.push({
 		name: chalk.red('Back to Menu'),
 		value: 'exit'
