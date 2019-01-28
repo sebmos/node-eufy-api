@@ -120,16 +120,23 @@ export class LightBulb extends AbstractDevice {
 			packet.getBulbinfo().getPacket().setBulbset(new lakeside.BulbState());
 			packet.getBulbinfo().getPacket().getBulbset().setCommand(7);
 
-			packet.getBulbinfo().getPacket().getBulbset().setValues(new lakeside.BulbValues());
-
 			if (options.power !== undefined) {
 				packet.getBulbinfo().getPacket().getBulbset().setPower(options.power ? 1 : 0);
 			}
+
+			const bulbValues = new lakeside.BulbValues();
+			let bulbValueSet = false;
 			if (newBrightness !== undefined) {
-				packet.getBulbinfo().getPacket().getBulbset().getValues().setBrightness(newBrightness);
+				bulbValues.setBrightness(newBrightness);
+				bulbValueSet = true;
 			}
 			if (newTemperature !== undefined) {
-				packet.getBulbinfo().getPacket().getBulbset().getValues().setTemperature(newTemperature);
+				bulbValues.setTemperature(newTemperature);
+				bulbValueSet = true;
+			}
+			
+			if (bulbValueSet) {
+				packet.getBulbinfo().getPacket().getBulbset().setValues(bulbValues);
 			}
 		} else {
 			packet = new lakeside.T1013Packet();
