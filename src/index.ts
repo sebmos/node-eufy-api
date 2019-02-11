@@ -29,7 +29,7 @@ export const createDevice = (model: Model | string, code: string, ipAddress: str
 }
 
 export const loadDevices = async (email: string, password: string): Promise<Device[]> => {
-    log.log('Loading devices');
+    log.log('Logging in');
 
     const payload: { [key: string]: string } = {
         client_id: clientId,
@@ -56,6 +56,8 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
     } else {
         throw new Error(JSON.stringify(authJson));
     }
+
+    log.log('Loading devices');
 
     const devicesResult = await fetch('https://home-api.eufylife.com/v1/device/list/devices-and-groups', {
         headers: {
@@ -84,6 +86,8 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
                 }
             }
         });
+
+        log.success('Logged in, devices loaded');
 
         return devices;
     } else if (devicesJson.message) {

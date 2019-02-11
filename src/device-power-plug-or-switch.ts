@@ -1,9 +1,12 @@
 import { AbstractDevice, Packet } from './device-base';
 import { RgbColors, HslColors } from './colors';
+import * as log from './log';
 const lakeside = require('./lakeside_pb.js');
 
 export class PowerPlugOrSwitch extends AbstractDevice {
 	private async getState(): Promise<Packet> {
+		log.verbose('PowerPlugOrSwitch.getState', 'Loading current device state');
+
 		const packet = new lakeside.T1201Packet();
 		packet.setSequence(await this.getSequence());
 		packet.setCode(this.code);
@@ -11,10 +14,14 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 		packet.setSwitchinfo(new lakeside.SwitchInfo());
 		packet.getSwitchinfo().setType(1);
 
+		log.verbose('PowerPlugOrSwitch.getState', 'Sending request to device');
+
 		return await this.sendPacketWithResponse(packet);
 	}
 
 	async loadCurrentState(): Promise<void> {
+		log.verbose('PowerPlugOrSwitch.loadCurrentState', 'Loading current device state');
+
 		const response = await this.getState();
 
 		this.power = response
@@ -22,9 +29,13 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 			.getPacket()
 			.getSwitchstatus()
 			.getPower() === 1;
+
+		log.verbose('PowerPlugOrSwitch.loadCurrentState', 'Current power state:', this.power);
 	}
 
 	async setPowerOn(powerOn: boolean): Promise<boolean> {
+		log.verbose('PowerPlugOrSwitch.setPowerOn', 'Change to:', powerOn);
+
 		const packet = new lakeside.T1201Packet();
 
 		packet.setSwitchinfo(new lakeside.SwitchInfo());
@@ -40,9 +51,15 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 		packet.setSequence(await this.getSequence());
 		packet.setCode(this.code);
 
+		log.verbose('PowerPlugOrSwitch.setState', 'Sending packet');
+
 		await this.sendPacket(packet);
 
+		log.verbose('PowerPlugOrSwitch.setState', 'Reloading state');
+
 		await this.loadCurrentState();
+
+		log.verbose('PowerPlugOrSwitch.setState', 'New power state:', this.power);
 
 		return this.power!;
 	}

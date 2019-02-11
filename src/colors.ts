@@ -1,3 +1,5 @@
+import * as log from './log';
+
 export interface RgbColors {
     red: number;
     green: number;
@@ -37,11 +39,20 @@ export const hsl2rgb = (hue: number, saturation: number, lightness: number): Rgb
         blue = hue2rgb(p, q, hue - 1/3);
     }
 
-    return {
+    const rgb = {
         red: Math.round(red * 255),
         green: Math.round(green * 255),
         blue: Math.round(blue * 255)
     };
+
+    log.verbose(
+        'hsl2rgb',
+        `H:${hue},S:${saturation},L:${lightness}`,
+        'to',
+        `R:${rgb.red},G:${rgb.green},B:${rgb.blue}`
+    );
+
+    return rgb;
 }
 
 export interface HslColors {
@@ -98,9 +109,18 @@ export const rgb2hsl = (red: number, green: number, blue: number): HslColors => 
         hue /= 6;
     }
 
-    return {
+    const hsl = {
         hue,
         saturation,
         lightness
     };
+
+    log.verbose(
+        'rgb2hsl',
+        `R:${red},G:${green},B:${blue}`,
+        'to',
+        `H:${hsl.hue},S:${hsl.saturation},L:${hsl.lightness})`
+    );
+
+    return hsl;
 }

@@ -19,23 +19,37 @@ All devices listed above should work, since they are supported in /python-lakesi
 If you own one of these untested, or any new  devices that aren't listed, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
 
 ## Usage
-### Installation
+### Installation via NPM
 Add the node-eufy-api package to your project:
 ```
 npm install node-eufy-api --save
 ```
 
-The package provides access to the functions `loadDevices` and `createDevice`, as well as several TypeScript interfaces. The [API Reference](#api-reference) section below contains details about the API.
+The package exposes the functions `loadDevices` and `createDevice`, as well as several TypeScript interfaces. The [API Reference](#api-reference) section below contains details about the API.
+
+### Command-line Interface
+To run the Eufy command-line interface, run the following commands:
+
+```bash
+# Clone repository to your computer
+git clone git@github.com:sebmos/node-eufy-api.git
+cd node-eufy-api/
+# Install dependencies
+npm install
+# Build code
+npm run build
+# Run CLI (usual way)
+npm run cli
+# Alternative: Run CLI (with verbose logging)
+npm run cli:verbose
+```
+
+After authenticating, this command lists all available eufy devices, models, codes & IP addresses and lets you control them.
 
 ### About eufy API
 It is necessary to connect and authenticate with eufy's API to identify the device model, code and IP address. With this information, devices can be controlled directly, without connecting to eufy's API.
 
 Since the devices are controlled through a local socket connection, node-eufy-api needs to run on the same WiFi network as the devices.
-
-### Command-line Interface
-Run `npm run cli`
-
-After authenticating, this command lists all available eufy devices, models, codes & IP addresses and lets you control them.
 
 ### What is my device's model, code and IP address?
 To identify the devices you have, as well as their models, codes and IP addresses, use the [command-line interface](#command-line-interface) or run the `loadDevices(email: string, password: string): Promise<Device[]>` function.

@@ -112,6 +112,8 @@ export abstract class AbstractDevice implements Device {
 	protected power?: boolean;
 
 	constructor(model: Model, code: string, ipAddress: string, name?: string) {
+		log.verbose('AbstractDevice.new', `Create device (model: ${model}, code: ${code})`);
+
 		this.model = model;
 		this.code = code;
 		this.ipAddress = ipAddress;
@@ -138,6 +140,8 @@ export abstract class AbstractDevice implements Device {
 
 		this.onConnectionEventHandler = [];
 		this.socket = new TcpSocket(this.ipAddress, 55556, connected => {
+			log.verbose('AbstractDevice.new', 'TCP Socket connected');
+
 			this.onConnectionEventHandler.forEach(handler => handler(connected));
 		});
 	}
@@ -147,6 +151,8 @@ export abstract class AbstractDevice implements Device {
 	}
 
 	on(event: DeviceEvent, handler: (connected: boolean) => void) {
+		log.verbose('AbstractDevice.on', `Attaching event handler "${event}"`);
+
 		if (event === DeviceEvent.CONNECTION_STATE_CHANGED) {
 			this.onConnectionEventHandler.push(handler);
 		} else {
@@ -159,17 +165,23 @@ export abstract class AbstractDevice implements Device {
 	}
 
 	async connect(): Promise<void> {
+		log.verbose('AbstractDevice.connect', 'Connecting');
+
 		await this.socket.connect();
 
-		log.verbose(`Connected to device ${this.toString()}`);
+		log.verbose('AbstractDevice.connect', `Connected to device ${this.toString()}`);
 
 		// no need to add this to promise chain
 		this.keepAliveInterval = setInterval(() => this.getSequence(), 10000);
+
+		log.verbose('AbstractDevice.connect', 'Loading current device state');
 
 		return await this.loadCurrentState();
 	}
 
 	async disconnect(): Promise<void> {
+		log.verbose('AbstractDevice.disconnect', 'Disconnecting');
+
 		await this.socket.disconnect();
 
 		if (this.keepAliveInterval) {
@@ -183,6 +195,8 @@ export abstract class AbstractDevice implements Device {
 	abstract setPowerOn(on: boolean): Promise<boolean>;
 
 	isPowerOn(): boolean {
+		log.verbose('AbstractDevice.isPowerOn', 'Checking power state');
+
 		if (this.power === undefined) {
 			throw new Error(`Unknown device state - call loadCurrentState()`);
 		}
@@ -205,37 +219,61 @@ export abstract class AbstractDevice implements Device {
 	abstract setHslColors(hue: number, saturation: number, lightness: number): Promise<HslColors>;
 
 	protected async sendPacket(packet: Packet): Promise<void> {
+		log.verbose('AbstractDevice.sendPacket', packet);;
+
 		const encryptedPacket = encryptPacket(packet.serializeBinary());
 
 		try {
 			await this.socket.send(encryptedPacket);
-		} catch (e) {
+		} catch (error) {
+			log.error('Error sending packet to device, trying to re-send', error);
+
 			await this.connect();
+
+			log.verbose('AbstractDevice.sendPacket', 'Re-connected - trying to re-send packet');
+
 			await this.socket.send(encryptedPacket);
 		}
 	}
 
 	protected async sendPacketWithResponse(packet: Packet): Promise<Packet> {
+		log.verbose('AbstractDevice.sendPacketWithResponse', packet);
+
 		const encryptedPacket = encryptPacket(packet.serializeBinary());
 
 		let response;
 		try {
 			response = await this.socket.sendWaitForResponse(encryptedPacket);
-		} catch (e) {
+		} catch (error) {
+			log.error('Error sending packet to device, retrying', error);
+
 			await this.connect()
+
+			log.verbose('AbstractDevice.sendPacketWithResponse', 'Re-connected - trying to re-send packet');
+
 			response = await this.socket.sendWaitForResponse(encryptedPacket);
 		}
 
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response received:', JSON.stringify(response.toJSON()));
+
 		const decrypted = decryptResponse(response);
+
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response decrypted:', JSON.stringify(decrypted.toJSON()));
 
 		const packetLength = bufferpack.unpack('<H', decrypted.slice(0, 2))[0];
 		const serializedPacket = decrypted.slice(2, packetLength + 2);
 
 		if (isWhiteLightBulb(this.model)) {
+			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1012Packet');
+
 			return lakeside.T1012Packet.deserializeBinary(serializedPacket);
 		} else if (this.model === Model.T1013) {
+			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1013Packet');
+
 			return lakeside.T1013Packet.deserializeBinary(serializedPacket);
 		} else if (isPlugOrSwitch(this.model)) {
+			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1201Packet');
+
 			return lakeside.T1201Packet.deserializeBinary(serializedPacket);
 		} else {
 			throw new Error(`Unable to deserialize response for model "${this.model}"`);
@@ -243,6 +281,8 @@ export abstract class AbstractDevice implements Device {
 	}
 
 	protected async getSequence(): Promise<number> {
+		log.verbose('AbstractDevice.getSequence', 'Loading current sequence number');
+
 		const packet = new lakeside.T1012Packet();
 		packet.setSequence(Math.round(Math.random() * 3000000));
 		packet.setCode(this.code);
@@ -252,6 +292,8 @@ export abstract class AbstractDevice implements Device {
 		packet.setPing(ping);
 
 		const response = await this.sendPacketWithResponse(packet);
+
+		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', response.getSequence());
 
 		return response.getSequence() + 1;
 	}

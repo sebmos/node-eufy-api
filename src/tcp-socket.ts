@@ -26,7 +26,8 @@ export class TcpSocket {
 				return resolve();
 			}
 
-			log.verbose(`Connecting to device at ${this.ipAddress}`);
+			log.verbose('TcpSocket.connect', `Connecting at ${this.ipAddress}`);
+
 			let connectPromiseResolved = false;
 
 			this.socket = createConnection({

@@ -35,7 +35,12 @@ const chooseDevice = async (devices: Device[]): Promise<Device> => {
 
 	const device = devices.find(device => device.code === deviceCode)!;
 
-	await device.connect();
+	try {
+		await device.connect();
+	} catch (error) {
+		log.error('Error connecting to device:', error);
+		process.exit();
+	}
 
 	return device;
 };
@@ -94,8 +99,12 @@ const deviceMenu = async (device: Device): Promise<void> => {
 
 	switch (action) {
 		case 'power':
-			const newStatus = await device.setPowerOn(!device.isPowerOn());
-			log.success(`Power is now ${newStatus ? 'on' : 'off'}`);
+			try {
+				const newStatus = await device.setPowerOn(!device.isPowerOn());
+				log.success(`Power is now ${newStatus ? 'on' : 'off'}`);
+			} catch (error) {
+				log.error('Error toggling power:', error);
+			}
 
 			break;
 
@@ -114,8 +123,12 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const updatedBrightness = await device.setBrightness(parseInt(newBrightness, 10));
-			log.success(`Brightness is now ${Math.round(updatedBrightness)}`);
+			try {
+				const updatedBrightness = await device.setBrightness(parseInt(newBrightness, 10));
+				log.success(`Brightness is now ${Math.round(updatedBrightness)}`);
+			} catch (error) {
+				log.error('Error changing brightness:', error);
+			}
 
 			break;
 
@@ -123,7 +136,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 			const { newTemperature } = await prompt([{
 				type: 'input',
 				name: 'newTemperature',
-				message: 'Enter brightness (between 0 and 100)',
+				message: 'Enter color temperature (between 0 and 100)',
 				validate: (value: string) => {
 					const number = parseInt(value, 10);
 					if (number === NaN || number < 0 || number > 100) {
@@ -134,8 +147,12 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 10));
-			log.success(`Temperature is now ${Math.round(updatedTemperature)}`);
+			try {
+				const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 10));
+				log.success(`Color temperature is now ${Math.round(updatedTemperature)}`);
+			} catch (error) {
+				log.error('Error changing color temperature:', error);
+			}
 
 			break;
 
@@ -159,9 +176,14 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				}
 			}]);
 
-			const newColorsParsed = newColors.split('/').map((v: string) => parseInt(v, 10));
-			const updatedColor = await device.setRgbColors(newColorsParsed[0], newColorsParsed[1], newColorsParsed[2]);
-			log.success(`Colors are now ${updatedColor.red}/${updatedColor.green}/${updatedColor.blue}`);
+
+			try {
+				const newColorsParsed = newColors.split('/').map((v: string) => parseInt(v, 10));
+				const updatedColor = await device.setRgbColors(newColorsParsed[0], newColorsParsed[1], newColorsParsed[2]);
+				log.success(`Colors are now ${updatedColor.red}/${updatedColor.green}/${updatedColor.blue}`);
+			} catch (error) {
+				log.error('Error changing colors:', error);
+			}
 
 			break;
 
@@ -218,6 +240,8 @@ const saveCredentials = async (email: string, password: string): Promise<void> =
 };
 
 (async () => {
+	log.setVerboseOutputEnabled(process.argv.slice(2).indexOf('--verbose') > -1);
+
 	let devices: Device[];
 
 	let email: string;
@@ -254,7 +278,6 @@ const saveCredentials = async (email: string, password: string): Promise<void> =
 		return;
 	}
 
-	log.success('Logged in!');
 	if (!usedCachedCredentials) {
 		const { shouldSaveCredentials } = await prompt({
 			type: 'confirm',

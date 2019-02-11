@@ -1,5 +1,6 @@
 import { AbstractDevice, Model, Packet, isWhiteLightBulb } from './device-base';
 import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors';
+import * as log from './log';
 const lakeside = require('./lakeside_pb.js');
 
 interface BulbState {
@@ -12,6 +13,8 @@ export class LightBulb extends AbstractDevice {
 	private state?: BulbState;
 
 	private async getState(): Promise<Packet> {
+		log.verbose('LightBulb.getState', 'Loading current device state');
+
 		const packet = new lakeside.T1012Packet();
 		packet.setSequence(await this.getSequence());
 		packet.setCode(this.code);
@@ -20,23 +23,39 @@ export class LightBulb extends AbstractDevice {
 		bulbInfo.setType(1);
 		packet.setBulbinfo(bulbInfo);
 
+		log.verbose('LightBulb.getState', 'Sending request to device');
+
 		return await this.sendPacketWithResponse(packet);
 	}
 
 	async loadCurrentState(): Promise<void> {
+		log.verbose('LightBulb.loadCurrentState', 'Loading current device state');
+
 		const response = await this.getState();
+
 		if (isWhiteLightBulb(this.model)) {
+			log.verbose('LightBulb.loadCurrentState', 'Parsing current state as white light bulb');
+
 			const bulbState = response.getBulbinfo().getPacket().getBulbstate();
 
 			this.power = bulbState.getPower() === 1;
+			log.verbose('LightBulb.loadCurrentState', 'Current power state:', this.power);
+
 			this.state = {
 				brightness: bulbState.getValues().getBrightness(),
 				temperature: bulbState.getValues().getTemperature()
 			};
+
+			log.verbose('LightBulb.loadCurrentState', `Current brightness: ${this.state!.brightness} (might be unsupported)`);
+			log.verbose('LightBulb.loadCurrentState', `Current temperature: ${this.state!.temperature} (might be unsupported)`);
 		} else {
+			log.verbose('LightBulb.loadCurrentState', 'Parsing current state as color light bulb');
+
 			const info = response.getBulbinfo().getPacket().getInfo();
 	
 			this.power = info.getPower() === 1;
+			log.verbose('LightBulb.loadCurrentState', 'Current power state:', this.power);
+
 			if (info.getColor() === 1) {
 				this.state = {
 					brightness: info.getColors().getBrightness(),
@@ -52,11 +71,17 @@ export class LightBulb extends AbstractDevice {
 					brightness: info.getValues().getBrightness(),
 					temperature: info.getValues().getTemperature()
 				};
+
+				log.verbose('LightBulb.loadCurrentState', 'No color information returned');
 			}
+
+			log.verbose('LightBulb.loadCurrentState', 'Current state:', JSON.stringify(this.state!));
 		}
 	}
 
 	private parseValueAsNumber(label: string, value: any, maxValue: number): number {
+		log.verbose('LightBulb.parseValueAsNumber', `Input: "${value}" (Max Value: ${maxValue})`);
+
 		let newValue: number;
 		if (typeof value === 'number') {
 			newValue = value;
@@ -68,10 +93,14 @@ export class LightBulb extends AbstractDevice {
 			throw new Error(`The ${label} value needs to be a number between 0 and ${Math.round(maxValue)}`);
 		}
 
+		log.verbose('LightBulb.parseValueAsNumber', 'Result:', newValue);
+
 		return newValue;
 	}
 
 	private async setState(options: Partial<BulbState> & { power?: boolean }): Promise<void> {
+		log.verbose('LightBulb.setState', 'Change to:', options);
+
 		if (this.state === undefined) {
 			throw new Error(`Unknown bulb state - call loadCurrentState()`);
 		}
@@ -83,6 +112,8 @@ export class LightBulb extends AbstractDevice {
 			}
 
 			newBrightness = this.parseValueAsNumber('brightness', options.brightness, 100);
+
+			log.verbose('LightBulb.setState', 'Brightness:', newBrightness);
 		}
 
 		let newTemperature: number | undefined;
@@ -92,6 +123,8 @@ export class LightBulb extends AbstractDevice {
 			}
 
 			newTemperature = this.parseValueAsNumber('temperature', options.temperature, 100);
+
+			log.verbose('LightBulb.setState', 'Temperature:', newTemperature);
 		}
 
 		let newColors: RgbColors | undefined;
@@ -105,10 +138,14 @@ export class LightBulb extends AbstractDevice {
 				green: Math.round(this.parseValueAsNumber('green color', options.colors.green, 255)),
 				blue: Math.round(this.parseValueAsNumber('blue color', options.colors.blue, 255))
 			};
+
+			log.verbose('LightBulb.setState', 'Colors:', JSON.stringify(newColors));
 		}
 
 		let packet: Packet;
 		if (isWhiteLightBulb(this.model)) {
+			log.verbose('LightBulb.setState', 'Treat as white light bulb (T1012Packet)');
+
 			packet = new lakeside.T1012Packet();
 
 			packet.setBulbinfo(new lakeside.BulbInfo());
@@ -122,6 +159,8 @@ export class LightBulb extends AbstractDevice {
 
 			if (options.power !== undefined) {
 				packet.getBulbinfo().getPacket().getBulbset().setPower(options.power ? 1 : 0);
+
+				log.verbose('LightBulb.setState', 'Set power');
 			}
 
 			const bulbValues = new lakeside.BulbValues();
@@ -129,16 +168,24 @@ export class LightBulb extends AbstractDevice {
 			if (newBrightness !== undefined) {
 				bulbValues.setBrightness(newBrightness);
 				bulbValueSet = true;
+
+				log.verbose('LightBulb.setState', 'Set brightness');
 			}
 			if (newTemperature !== undefined) {
 				bulbValues.setTemperature(newTemperature);
 				bulbValueSet = true;
+
+				log.verbose('LightBulb.setState', 'Set temperature');
 			}
 			
 			if (bulbValueSet) {
 				packet.getBulbinfo().getPacket().getBulbset().setValues(bulbValues);
+
+				log.verbose('LightBulb.setState', 'Apply bulb values');
 			}
 		} else {
+			log.verbose('LightBulb.setState', 'Treat as color bulb (T1013Packet)');
+
 			packet = new lakeside.T1013Packet();
 
 			packet.setBulbinfo(new lakeside.T1013BulbInfo());
@@ -151,15 +198,21 @@ export class LightBulb extends AbstractDevice {
 
 			if (options.power !== undefined) {
 				packet.getBulbinfo().getPacket().getControl().setPower(options.power ? 1 : 0);
+
+				log.verbose('LightBulb.setState', 'Set power');
 			}
 
 			if (newColors) {
+				log.verbose('LightBulb.setState', 'Set colors');
+
 				const colors = new lakeside.T1013Color();
 				colors.setRed(newColors.red);
 				colors.setGreen(newColors.green);
 				colors.setBlue(newColors.blue);
 				if (newBrightness !== undefined) {
 					colors.setBrightness(newBrightness);
+
+					log.verbose('LightBulb.setState', 'Set brightness');
 				} else {
 					colors.setBrightness(this.state.brightness);
 				}
@@ -167,14 +220,20 @@ export class LightBulb extends AbstractDevice {
 				packet.getBulbinfo().getPacket().getControl().setColor(1);
 				packet.getBulbinfo().getPacket().getControl().setColors(colors);
 			} else {
+				log.verbose('LightBulb.setState', 'No colors');
+
 				const values = new lakeside.BulbValues();
 				if (newBrightness !== undefined) {
 					values.setBrightness(newBrightness);
+
+					log.verbose('LightBulb.setState', 'Set brightness');
 				} else {
 					values.setBrightness(this.state.brightness);
 				}
 				if (newTemperature !== undefined) {
 					values.setTemperature(newTemperature);
+
+					log.verbose('LightBulb.setState', 'Set temperature');
 				} else {
 					values.setTemperature(this.state.temperature);
 				}
@@ -187,13 +246,23 @@ export class LightBulb extends AbstractDevice {
 		packet.setSequence(await this.getSequence());
 		packet.setCode(this.code);
 
+		log.verbose('LightBulb.setState', 'Sending packet');
+
 		await this.sendPacket(packet);
+
+		log.verbose('LightBulb.setState', 'Reloading state');
+
 		await this.getState();
 	}
 
 	async setPowerOn(power: boolean): Promise<boolean> {
-		return this.setState({ power })
-			.then(() => this.power!);
+		log.verbose('LightBulb.setPowerOn', 'Change to:', power);
+
+		await this.setState({ power });
+
+		log.verbose('LightBulb.setPowerOn', 'New power state:', this.power);
+
+		return this.power!;
 	}
 
 	supportsBrightness(): boolean {
@@ -210,8 +279,13 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	async setBrightness(brightness: number): Promise<number> {
-		return this.setState({ brightness })
-			.then(() => this.state!.brightness)
+		log.verbose('LightBulb.setBrightness', 'Change to:', brightness);
+
+		await this.setState({ brightness });
+
+		log.verbose('LightBulb.setBrightness', 'New brightness:', this.state!.brightness);
+
+		return this.state!.brightness;
 	}
 
 	supportsTemperature(): boolean {
@@ -229,8 +303,13 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	async setTemperature(temperature: number): Promise<number> {
-		return this.setState({ temperature })
-			.then(() => this.state!.temperature!)
+		log.verbose('LightBulb.setTemperature', 'Change to:', temperature);
+
+		await this.setState({ temperature });
+
+		log.verbose('LightBulb.setTemperature', 'New temperature:', this.state!.brightness);
+
+		return this.state!.temperature!;
 	}
 
 	supportsColors(): boolean {
@@ -248,8 +327,13 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	async setRgbColors(red: number, green: number, blue: number): Promise<RgbColors> {
-		return this.setState({ colors: { red, green, blue } })
-			.then(() => this.state!.colors!)
+		log.verbose('LightBulb.setRgbColors', 'Change to R:', red, '- G:', green, '- B:', blue);
+
+		await this.setState({ colors: { red, green, blue } });
+
+		log.verbose('LightBulb.setRgbColors', 'New colors:', JSON.stringify(this.state!.colors));
+
+		return this.state!.colors!;
 	}
 
 	getHslColors(): HslColors {
@@ -263,17 +347,20 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	async setHslColors(hue: number, saturation: number, lightness: number): Promise<HslColors> {
+		log.verbose('LightBulb.setHslColors', 'Change to H:', hue, '- S:', saturation, '- L:', lightness);
+
 		const rgbColors = hsl2rgb(
 			this.parseValueAsNumber('hue', hue, 1),
 			this.parseValueAsNumber('saturation', saturation, 1),
 			this.parseValueAsNumber('lightness', lightness, 1)
 		);
 
-		return this.setState({ colors: rgbColors })
-			.then(() => {
-				const { red, green, blue } = this.state!.colors!;
+		await this.setState({ colors: rgbColors });
 
-				return rgb2hsl(red, green, blue);
-			});
+		log.verbose('LightBulb.setHslColors', 'New colors:', JSON.stringify(this.state!.colors));
+
+		const { red, green, blue } = this.state!.colors!;
+
+		return rgb2hsl(red, green, blue);
 	}
 }

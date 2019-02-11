@@ -10,7 +10,8 @@
     "build:proto_cp": "cp ./src/lakeside_pb.js ./lib/",
     "build:tsc": "./node_modules/.bin/tsc",
     "build": "npm run build:tsc && npm run build:proto_cp",
-    "cli": "node lib/cli.js"
+    "cli": "node lib/cli.js",
+    "cli:verbose": "node lib/cli.js --verbose"
   },
   "author": "Sebastian Moser <sebastian.moser@gmail.com>",
   "license": "Apache-2.0",
