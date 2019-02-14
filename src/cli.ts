@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { existsSync, readFile, writeFile } from 'fs';
+import { saveCredentials, loadCredentials, deleteCredentials } from './credentials-cache';
 import { prompt, objects } from 'inquirer';
 import { loadDevices, Device } from './index';
 import * as log from './log';
@@ -194,51 +194,6 @@ const deviceMenu = async (device: Device): Promise<void> => {
 	await deviceMenu(device);
 };
 
-const CREDENTIALS_FILE_NAME = '.credentials';
-
-const loadCredentials = async (): Promise<{ email: string, password: string } | undefined> => {
-	return new Promise((resolve, reject) => {
-		if (!existsSync(CREDENTIALS_FILE_NAME)) {
-			return resolve();
-		}
-
-		readFile(
-			CREDENTIALS_FILE_NAME,
-			'utf8',
-			(err?: Error, data?: string) => {
-				if (err) {
-					reject(err);
-				} else if (data) {
-					try {
-						resolve(JSON.parse(data));
-					} catch (e) {
-						reject(e);
-					}
-				} else {
-					resolve();
-				}
-			}
-		);
-	});
-};
-
-const saveCredentials = async (email: string, password: string): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		writeFile(
-			CREDENTIALS_FILE_NAME,
-			JSON.stringify({ email, password }),
-			'utf8',
-			(err?: Error) => {
-				if (err) {
-					return reject(err);
-				} else {
-					resolve();
-				}
-			}
-		);
-	});
-};
-
 (async () => {
 	log.setVerboseOutputEnabled(process.argv.slice(2).indexOf('--verbose') > -1);
 
@@ -246,14 +201,15 @@ const saveCredentials = async (email: string, password: string): Promise<void> =
 
 	let email: string;
 	let password: string;
-	let usedCachedCredentials: boolean;
+	let usedCachedCredentials: boolean = true;
 	try {
 		const cachedCredentials = await loadCredentials();
 		if (cachedCredentials) {
 			email = cachedCredentials.email;
 			password = cachedCredentials.password;
-			usedCachedCredentials = true;
 		} else {
+			usedCachedCredentials = false;
+
 			const { enteredEmail, enteredPassword } = await prompt([
 				{
 					type: 'input',
@@ -269,12 +225,25 @@ const saveCredentials = async (email: string, password: string): Promise<void> =
 
 			email = enteredEmail;
 			password = enteredPassword;
-			usedCachedCredentials = false;
 		}
 
 		devices = await loadDevices(email, password);
 	} catch (e) {
 		log.error(e.message);
+
+		if (usedCachedCredentials) {
+			const { shouldDeleteCredentials } = await prompt({
+				type: 'confirm',
+				default: true,
+				name: 'shouldDeleteCredentials',
+				message: 'Delete locally cached credentials?'
+			})
+	
+			if (shouldDeleteCredentials) {
+				await deleteCredentials();
+			}
+		}
+
 		return;
 	}
 
