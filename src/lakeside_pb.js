@@ -1280,7 +1280,7 @@ proto.lakeside.T1012Packet.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setSequence(value);
       break;
     case 2:
@@ -1328,7 +1328,7 @@ proto.lakeside.T1012Packet.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = /** @type {number} */ (jspb.Message.getField(message, 1));
   if (f != null) {
-    writer.writeInt32(
+    writer.writeInt64(
       1,
       f
     );
@@ -1360,7 +1360,7 @@ proto.lakeside.T1012Packet.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * required int32 sequence = 1;
+ * required int64 sequence = 1;
  * @return {number}
  */
 proto.lakeside.T1012Packet.prototype.getSequence = function() {
@@ -3063,7 +3063,7 @@ proto.lakeside.T1013Packet.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setSequence(value);
       break;
     case 2:
@@ -3111,7 +3111,7 @@ proto.lakeside.T1013Packet.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = /** @type {number} */ (jspb.Message.getField(message, 1));
   if (f != null) {
-    writer.writeInt32(
+    writer.writeInt64(
       1,
       f
     );
@@ -3143,7 +3143,7 @@ proto.lakeside.T1013Packet.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * required int32 sequence = 1;
+ * required int64 sequence = 1;
  * @return {number}
  */
 proto.lakeside.T1013Packet.prototype.getSequence = function() {
@@ -4309,7 +4309,7 @@ proto.lakeside.T1201Packet.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setSequence(value);
       break;
     case 2:
@@ -4357,7 +4357,7 @@ proto.lakeside.T1201Packet.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = /** @type {number} */ (jspb.Message.getField(message, 1));
   if (f != null) {
-    writer.writeInt32(
+    writer.writeInt64(
       1,
       f
     );
@@ -4389,7 +4389,7 @@ proto.lakeside.T1201Packet.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * required int32 sequence = 1;
+ * required int64 sequence = 1;
  * @return {number}
  */
 proto.lakeside.T1201Packet.prototype.getSequence = function() {
