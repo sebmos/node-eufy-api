@@ -38,7 +38,7 @@ const chooseDevice = async (devices: Device[]): Promise<Device> => {
 	try {
 		await device.connect();
 	} catch (error) {
-		log.error('Error connecting to device:', error);
+		log.error('Error connecting to device:', error.message || error);
 		process.exit();
 	}
 
@@ -103,7 +103,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				const newStatus = await device.setPowerOn(!device.isPowerOn());
 				log.success(`Power is now ${newStatus ? 'on' : 'off'}`);
 			} catch (error) {
-				log.error('Error toggling power:', error);
+				log.error('Error toggling power:', error.message || error);
 			}
 
 			break;
@@ -127,7 +127,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				const updatedBrightness = await device.setBrightness(parseInt(newBrightness, 10));
 				log.success(`Brightness is now ${Math.round(updatedBrightness)}`);
 			} catch (error) {
-				log.error('Error changing brightness:', error);
+				log.error('Error changing brightness:', error.message || error);
 			}
 
 			break;
@@ -151,7 +151,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 10));
 				log.success(`Color temperature is now ${Math.round(updatedTemperature)}`);
 			} catch (error) {
-				log.error('Error changing color temperature:', error);
+				log.error('Error changing color temperature:', error.message || error);
 			}
 
 			break;
@@ -182,7 +182,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				const updatedColor = await device.setRgbColors(newColorsParsed[0], newColorsParsed[1], newColorsParsed[2]);
 				log.success(`Colors are now ${updatedColor.red}/${updatedColor.green}/${updatedColor.blue}`);
 			} catch (error) {
-				log.error('Error changing colors:', error);
+				log.error('Error changing colors:', error.message || error);
 			}
 
 			break;
@@ -229,7 +229,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 
 		devices = await loadDevices(email, password);
 	} catch (e) {
-		log.error(e.message);
+		log.error(e.message || e);
 
 		if (usedCachedCredentials) {
 			const { shouldDeleteCredentials } = await prompt({

@@ -2,12 +2,13 @@ import { Socket, createConnection, isIP } from 'net';
 import * as log from './log';
 
 export class TcpSocket {
-	ipAddress: string;
-	port: number;
-	socket?: Socket;
-	nextMessage?: Buffer;
+	private ipAddress: string;
+	private port: number;
+	private socket?: Socket;
+	private nextMessage?: Buffer;
 	connected: boolean;
-	connectionChangedHandler: (connected: boolean) => void;
+	private connectionIndex: number = 0;
+	private connectionChangedHandler: (connected: boolean) => void;
 
 	constructor(ipAddress: string, port: number, connectionChangedHandler: (connected: boolean) => void) {
 		this.ipAddress = ipAddress;
@@ -26,7 +27,9 @@ export class TcpSocket {
 				return resolve();
 			}
 
-			log.verbose('TcpSocket.connect', `Connecting at ${this.ipAddress}`);
+			this.connectionIndex += 1;
+
+			log.verbose('TcpSocket.connect', `Connecting to ${this.ipAddress}`);
 
 			let connectPromiseResolved = false;
 
@@ -47,7 +50,7 @@ export class TcpSocket {
 
 			this.socket.on('error', error => {
 				if (connectPromiseResolved) {
-					log.error('Socket Error:', error);
+					log.error('Socket Error:', error.message || error);
 				}
 			});
 
@@ -100,6 +103,7 @@ export class TcpSocket {
 	async sendWaitForResponse(message: Buffer): Promise<Buffer> {
 		this.nextMessage = undefined;
 
+		const preSendConnectionIndex = this.connectionIndex;
 		await this.send(message);
 
 		return new Promise((resolve, reject) => {
@@ -112,6 +116,10 @@ export class TcpSocket {
 					clearInterval(interval);
 
 					resolve(this.nextMessage);
+				} else if (preSendConnectionIndex < this.connectionIndex) {
+					clearInterval(interval);
+
+					reject(new Error('Socket failed while sending (Symptom of invalid message sent to socket)'));
 				} else if (attempts++ > timeout / intervalTime) {
 					clearInterval(interval);
 

@@ -106,7 +106,6 @@ export abstract class AbstractDevice implements Device {
 	readonly deviceType: DeviceType;
 
 	private readonly socket: TcpSocket;
-	private keepAliveInterval?: NodeJS.Timeout;
 	private onConnectionEventHandler: Array<(connected: boolean) => void>;
 
 	protected power?: boolean;
@@ -164,19 +163,28 @@ export abstract class AbstractDevice implements Device {
 		return this.socket.connected;
 	}
 
+	private isConnecting: boolean = false;
+
 	async connect(): Promise<void> {
 		log.verbose('AbstractDevice.connect', 'Connecting');
+
+		if (this.isConnecting) {
+			log.verbose('AbstractDevice.connect', 'Stopping - currently trying to connect');
+
+			return;
+		}
+
+		this.isConnecting = true;
 
 		await this.socket.connect();
 
 		log.verbose('AbstractDevice.connect', `Connected to device ${this.toString()}`);
 
-		// no need to add this to promise chain
-		this.keepAliveInterval = setInterval(() => this.getSequence(), 10000);
-
 		log.verbose('AbstractDevice.connect', 'Loading current device state');
 
-		return await this.loadCurrentState();
+		await this.loadCurrentState();
+
+		this.isConnecting = false;
 	}
 
 	async disconnect(): Promise<void> {
@@ -184,10 +192,6 @@ export abstract class AbstractDevice implements Device {
 
 		await this.socket.disconnect();
 
-		if (this.keepAliveInterval) {
-			clearInterval(this.keepAliveInterval);
-			this.keepAliveInterval = undefined;
-		}
 		this.onConnectionEventHandler = [];
 	}
 
@@ -218,15 +222,40 @@ export abstract class AbstractDevice implements Device {
 	abstract getHslColors(): HslColors;
 	abstract setHslColors(hue: number, saturation: number, lightness: number): Promise<HslColors>;
 
-	protected async sendPacket(packet: Packet): Promise<void> {
-		log.verbose('AbstractDevice.sendPacket', packet);;
+	private encryptPacket(packet: Packet): Buffer {
+		log.verbose('AbstractDevice.encryptPacket', packet);
 
-		const encryptedPacket = encryptPacket(packet.serializeBinary());
+		let serializedPacket: Uint8Array;
+		try {
+			serializedPacket = packet.serializeBinary();
+		} catch (e) {
+			throw new Error('Error serializing packet: ' + (e.message || 'Unknown'));
+		}
+
+		try {
+			return encryptPacket(serializedPacket);
+		} catch (e) {
+			throw new Error('Error encrypting packet: ' + (e.message || 'Unknown'));
+		}
+	}
+
+	protected async sendPacket(packet: Packet): Promise<void> {
+		log.verbose('AbstractDevice.sendPacket', packet);
+
+		if (!this.isConnected()) {
+			log.verbose('AbstractDevice.sendPacket', 'Not connected - connecting first');
+
+			await this.connect();
+		}
+
+		const encryptedPacket = this.encryptPacket(packet);
+
+		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
 
 		try {
 			await this.socket.send(encryptedPacket);
 		} catch (error) {
-			log.error('Error sending packet to device, trying to re-send', error);
+			log.error('Retrying sending sending packet to device after error:', error.message || error);
 
 			await this.connect();
 
@@ -239,13 +268,21 @@ export abstract class AbstractDevice implements Device {
 	protected async sendPacketWithResponse(packet: Packet): Promise<Packet> {
 		log.verbose('AbstractDevice.sendPacketWithResponse', packet);
 
-		const encryptedPacket = encryptPacket(packet.serializeBinary());
+		if (!this.isConnected()) {
+			log.verbose('AbstractDevice.sendPacketWithResponse', 'Not connected - connecting first');
+
+			await this.connect();
+		}
+
+		const encryptedPacket = this.encryptPacket(packet);
+
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Sending encrypted packet');
 
 		let response;
 		try {
 			response = await this.socket.sendWaitForResponse(encryptedPacket);
 		} catch (error) {
-			log.error('Error sending packet to device, retrying', error);
+			log.error('Retrying sending sending packet to device after error:', error.message || error);
 
 			await this.connect()
 
