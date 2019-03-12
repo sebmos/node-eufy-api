@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import * as log from './log';
 
 const keyBytes: Uint8Array = new Uint8Array([
 	0x24, 0x4E, 0x6D, 0x8A, 0x56, 0xAC, 0x87, 0x91, 0x24, 0x43, 0x2D, 0x8B, 0x6C, 0xBC, 0xA2, 0xC4
@@ -11,8 +12,12 @@ export const encryptPacket = (rawPacket: Uint8Array): Buffer => {
 	const extendedRawPacket = new Uint8Array(rawPacket.length + 16 - (rawPacket.length % 16));
 	extendedRawPacket.set(rawPacket);
 
+	log.verbose('encryptPacket', 'Extended:', Buffer.from(extendedRawPacket).toString('hex'));
+
 	const cipher = crypto.createCipheriv('aes-128-cbc', keyBytes, ivBytes);
 	const encrypted = cipher.update(extendedRawPacket);
+
+	log.verbose('encryptPacket', 'Encrypted:', encrypted.toString('hex'));
 
 	return Buffer.from(encrypted);
 };

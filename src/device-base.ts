@@ -232,6 +232,8 @@ export abstract class AbstractDevice implements Device {
 			throw new Error('Error serializing packet: ' + (e.message || 'Unknown'));
 		}
 
+		log.verbose('AbstractDevice.encryptPacket', 'Serialized:', Buffer.from(serializedPacket).toString('hex'));
+
 		try {
 			return encryptPacket(serializedPacket);
 		} catch (e) {
@@ -276,7 +278,7 @@ export abstract class AbstractDevice implements Device {
 
 		const encryptedPacket = this.encryptPacket(packet);
 
-		log.verbose('AbstractDevice.sendPacketWithResponse', 'Sending encrypted packet');
+		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
 
 		let response;
 		try {
@@ -291,14 +293,20 @@ export abstract class AbstractDevice implements Device {
 			response = await this.socket.sendWaitForResponse(encryptedPacket);
 		}
 
-		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response received:', JSON.stringify(response.toJSON()));
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response received:', response.toString('hex'));
 
 		const decrypted = decryptResponse(response);
 
-		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response decrypted:', JSON.stringify(decrypted.toJSON()));
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response decrypted:', decrypted.toString('hex'));
 
 		const packetLength = bufferpack.unpack('<H', decrypted.slice(0, 2))[0];
+
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Expected packet length:', packetLength);
+
 		const serializedPacket = decrypted.slice(2, packetLength + 2);
+
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet:', serializedPacket.toString('hex'));
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet length:', serializedPacket.length);
 
 		if (isWhiteLightBulb(this.model)) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1012Packet');
@@ -324,14 +332,18 @@ export abstract class AbstractDevice implements Device {
 		packet.setSequence(Math.round(Math.random() * 3000000));
 		packet.setCode(this.code);
 
-		const ping = new lakeside.Ping();
-		ping.setType(0);
-		packet.setPing(ping);
+		packet.setPing(new lakeside.Ping());
+		packet.getPing().setType(0);
 
 		const response = await this.sendPacketWithResponse(packet);
+		const currentSequence = response.getSequence();
 
-		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', response.getSequence());
+		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', currentSequence);
 
-		return response.getSequence() + 1;
+		if (currentSequence > 0x80000000) {
+			log.warn('WARNING: There is a bug with Eufy devices that might mean that your device will disconnect! For further information, go: https://github.com/sebmos/node-eufy-api/issues');
+		}
+
+		return currentSequence + 1;
 	}
 }
