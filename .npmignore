@@ -1,4 +1,6 @@
-src/
 .idea/
-webpack.config.js
+node_modules/
+src/
+.credentials
+.DS_Store
 tsconfig.json

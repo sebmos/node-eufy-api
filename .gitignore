@@ -1,6 +1,5 @@
-node_modules/
-lib/
 .idea/
-
+lib/
+node_modules/
 .credentials
-
+.DS_Store
