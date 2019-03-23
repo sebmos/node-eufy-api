@@ -177,7 +177,7 @@ export class LightBulb extends AbstractDevice {
 
 				log.verbose('LightBulb.setState', 'Change temperature to', newTemperature);
 			}
-			
+
 			if (bulbValueSet) {
 				packet.getBulbinfo().getPacket().getBulbset().setValues(bulbValues);
 

@@ -148,7 +148,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 			}]);
 
 			try {
-				const updatedTemperature = await device.setBrightness(parseInt(newTemperature, 10));
+				const updatedTemperature = await device.setTemperature(parseInt(newTemperature, 10));
 				log.success(`Color temperature is now ${Math.round(updatedTemperature)}`);
 			} catch (error) {
 				log.error('Error changing color temperature:', error.message || error);
