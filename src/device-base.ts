@@ -254,17 +254,7 @@ export abstract class AbstractDevice implements Device {
 
 		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
 
-		try {
-			await this.socket.send(encryptedPacket);
-		} catch (error) {
-			log.error('Retrying sending sending packet to device after error:', error.message || error);
-
-			await this.connect();
-
-			log.verbose('AbstractDevice.sendPacket', 'Re-connected - trying to re-send packet');
-
-			await this.socket.send(encryptedPacket);
-		}
+		await this.socket.send(encryptedPacket);
 	}
 
 	protected async sendPacketWithResponse(packet: Packet): Promise<Packet> {
@@ -280,18 +270,7 @@ export abstract class AbstractDevice implements Device {
 
 		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
 
-		let response;
-		try {
-			response = await this.socket.sendWaitForResponse(encryptedPacket);
-		} catch (error) {
-			log.error('Retrying sending sending packet to device after error:', error.message || error);
-
-			await this.connect()
-
-			log.verbose('AbstractDevice.sendPacketWithResponse', 'Re-connected - trying to re-send packet');
-
-			response = await this.socket.sendWaitForResponse(encryptedPacket);
-		}
+		const response = await this.socket.sendWaitForResponse(encryptedPacket);
 
 		log.verbose('AbstractDevice.sendPacketWithResponse', 'Response received:', response.toString('hex'));
 

@@ -7,7 +7,6 @@ export class TcpSocket {
 	private socket?: Socket;
 	private nextMessage?: Buffer;
 	connected: boolean;
-	private connectionIndex: number = 0;
 	private connectionChangedHandler: (connected: boolean) => void;
 
 	constructor(ipAddress: string, port: number, connectionChangedHandler: (connected: boolean) => void) {
@@ -21,13 +20,11 @@ export class TcpSocket {
 		};
 	}
 
-	connect(externalAttempt: boolean=true): Promise<void> {
+	connect(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			if (this.connected) {
 				return resolve();
 			}
-
-			this.connectionIndex += 1;
 
 			log.verbose('TcpSocket.connect', `Connecting to ${this.ipAddress}`);
 
@@ -58,20 +55,14 @@ export class TcpSocket {
 				let baseMessage = `Socket closed${hadError ? ' (with error)' : ''}`;
 
 				if (connectPromiseResolved) {
-					log.warn(`${baseMessage} - attempting restart`);
-
-					this.connectionChangedHandler(false);
-					this.connect(false);
-				} else if (externalAttempt) {
+					log.warn(baseMessage);
+				} else {
 					log.warn(`${baseMessage} during connection process - not attempting restart`);
 
 					reject(new Error('Unable to connect to device. Are you on the same WiFi network?'));
-				} else {
-					log.warn(`${baseMessage} during connection process - attempting restart in 10 seconds`);
-
-					this.connectionChangedHandler(false);
-					setTimeout(() => this.connect(false), 10000);;
 				}
+
+				this.connectionChangedHandler(false);
 			});
 
 			this.socket.on('timeout', () => {
@@ -103,7 +94,6 @@ export class TcpSocket {
 	async sendWaitForResponse(message: Buffer): Promise<Buffer> {
 		this.nextMessage = undefined;
 
-		const preSendConnectionIndex = this.connectionIndex;
 		await this.send(message);
 
 		return new Promise((resolve, reject) => {
@@ -116,10 +106,10 @@ export class TcpSocket {
 					clearInterval(interval);
 
 					resolve(this.nextMessage);
-				} else if (preSendConnectionIndex < this.connectionIndex) {
+				} else if (!this.connected) {
 					clearInterval(interval);
 
-					reject(new Error('Socket failed while sending (Symptom of invalid message sent to socket)'));
+					reject(new Error('Socket closed without sending response'));
 				} else if (attempts++ > timeout / intervalTime) {
 					clearInterval(interval);
 
