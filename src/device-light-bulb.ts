@@ -1,7 +1,7 @@
-import { AbstractDevice, Model, Packet, isWhiteLightBulb } from './device-base';
+import * as protobuf from 'protobufjs';
+import { AbstractDevice, Message, Model, isWhiteLightBulb } from './device-base';
 import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors';
 import * as log from './log';
-const lakeside = require('./lakeside_pb.js');
 
 interface BulbState {
 	brightness: number;
@@ -12,16 +12,19 @@ interface BulbState {
 export class LightBulb extends AbstractDevice {
 	private state?: BulbState;
 
-	private async getState(): Promise<Packet> {
+	private async getState(): Promise<Message> {
 		log.verbose('LightBulb.getState', 'Loading current device state');
 
-		const packet = new lakeside.T1012Packet();
-		packet.setSequence(await this.getSequence());
-		packet.setCode(this.code);
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
 
-		const bulbInfo = new lakeside.BulbInfo();
-		bulbInfo.setType(1);
-		packet.setBulbinfo(bulbInfo);
+		const packetType = proto.lookupType('lakeside.T1012Packet');
+		const packet = packetType.encode({
+			sequence: await this.getSequence(),
+			code: this.code,
+			bulbInfo: {
+				type: 1
+			}
+		}).finish();
 
 		log.verbose('LightBulb.getState', 'Sending request to device');
 
@@ -36,14 +39,14 @@ export class LightBulb extends AbstractDevice {
 		if (isWhiteLightBulb(this.model)) {
 			log.verbose('LightBulb.loadCurrentState', 'Parsing current state as white light bulb');
 
-			const bulbState = response.getBulbinfo().getPacket().getBulbstate();
+			const bulbState = response.bulbinfo.packet.bulbstate;
 
-			this.power = bulbState.getPower() === 1;
+			this.power = bulbState.power === 1;
 			log.verbose('LightBulb.loadCurrentState', 'Current power state:', this.power);
 
 			this.state = {
-				brightness: bulbState.getValues().getBrightness(),
-				temperature: bulbState.getValues().getTemperature()
+				brightness: bulbState.values.brightness,
+				temperature: bulbState.values.temperature
 			};
 
 			log.verbose('LightBulb.loadCurrentState', `Current brightness: ${this.state!.brightness} (might be unsupported)`);
@@ -51,25 +54,21 @@ export class LightBulb extends AbstractDevice {
 		} else {
 			log.verbose('LightBulb.loadCurrentState', 'Parsing current state as color light bulb');
 
-			const info = response.getBulbinfo().getPacket().getInfo();
+			const info = response.bulbinfo.packet.info;
 	
-			this.power = info.getPower() === 1;
+			this.power = info.power === 1;
 			log.verbose('LightBulb.loadCurrentState', 'Current power state:', this.power);
 
-			if (info.getColor() === 1) {
+			if (info.color === 1) {
 				this.state = {
-					brightness: info.getColors().getBrightness(),
+					brightness: info.colors.brightness,
 					temperature: 50,
-					colors: {
-						red: info.getColors().getRed(),
-						green: info.getColors().getGreen(),
-						blue: info.getColors().getBlue()
-					}
+					colors: info.colors
 				};
 			} else {
 				this.state = {
-					brightness: info.getValues().getBrightness(),
-					temperature: info.getValues().getTemperature()
+					brightness: info.values.brightness,
+					temperature: info.values.temperature
 				};
 
 				log.verbose('LightBulb.loadCurrentState', 'No color information returned');
@@ -142,62 +141,69 @@ export class LightBulb extends AbstractDevice {
 			log.verbose('LightBulb.setState', 'Colors:', JSON.stringify(newColors));
 		}
 
-		let packet: Packet;
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
+		let message: Message = {
+			sequence: await this.getSequence(),
+			code: this.code
+		};
+
+		let packetType: protobuf.Type;
 		if (isWhiteLightBulb(this.model)) {
 			log.verbose('LightBulb.setState', 'Treat as white light bulb (T1012Packet)');
 
-			packet = new lakeside.T1012Packet();
-
-			packet.setBulbinfo(new lakeside.BulbInfo());
-			packet.getBulbinfo().setType(0);
-
-			packet.getBulbinfo().setPacket(new lakeside.BulbPacket());
-			packet.getBulbinfo().getPacket().setUnknown1(100);
-
-			packet.getBulbinfo().getPacket().setBulbset(new lakeside.BulbState());
-			packet.getBulbinfo().getPacket().getBulbset().setCommand(7);
+			packetType = proto.lookupType('lakeside.T1012Packet');
+			message.bulbinfo = {
+				type: 0,
+				packet: {
+					unknown1: 100,
+					bulbset: {
+						command: 7
+					}
+				}
+			};
 
 			if (options.power !== undefined) {
-				packet.getBulbinfo().getPacket().getBulbset().setPower(options.power ? 1 : 0);
+				message.bulbinfo.packet.bulbset.power = options.power ? 1 : 0;
 
 				log.verbose('LightBulb.setState', 'Change power to', options.power);
 			}
 
-			const bulbValues = new lakeside.BulbValues();
+			const bulbValues: Message = {}
 			let bulbValueSet = false;
 			if (newBrightness !== undefined) {
-				bulbValues.setBrightness(newBrightness);
+				bulbValues.brightness = newBrightness;
 				bulbValueSet = true;
 
 				log.verbose('LightBulb.setState', 'Change brightness to', newBrightness);
 			}
 			if (newTemperature !== undefined) {
-				bulbValues.setTemperature(newTemperature);
+				bulbValues.temperature = newTemperature;
 				bulbValueSet = true;
 
 				log.verbose('LightBulb.setState', 'Change temperature to', newTemperature);
 			}
 
 			if (bulbValueSet) {
-				packet.getBulbinfo().getPacket().getBulbset().setValues(bulbValues);
+				message.bulbinfo.packet.bulbset.values = bulbValues;
 
 				log.verbose('LightBulb.setState', 'Apply bulb values');
 			}
 		} else {
 			log.verbose('LightBulb.setState', 'Treat as color bulb (T1013Packet)');
 
-			packet = new lakeside.T1013Packet();
-
-			packet.setBulbinfo(new lakeside.T1013BulbInfo());
-			packet.getBulbinfo().setType(0);
-
-			packet.getBulbinfo().setPacket(new lakeside.T1013State());
-			packet.getBulbinfo().getPacket().setUnknown1(10);
-			packet.getBulbinfo().getPacket().setControl(new lakeside.T1013Control());
-			packet.getBulbinfo().getPacket().getControl().setCommand(7);
+			packetType = proto.lookupType('lakeside.T1013Packet');
+			message.bulbinfo = {
+				type: 0,
+				packet: {
+					unknown1: 10,
+					control: {
+						command: 7
+					}
+				}
+			};
 
 			if (options.power !== undefined) {
-				packet.getBulbinfo().getPacket().getControl().setPower(options.power ? 1 : 0);
+				message.bulbinfo.packet.control.power = options.power ? 1 : 0;
 
 				log.verbose('LightBulb.setState', 'Change power to', options.power);
 			}
@@ -205,52 +211,48 @@ export class LightBulb extends AbstractDevice {
 			if (newColors) {
 				log.verbose('LightBulb.setState', 'Change colors to:', JSON.stringify(newColors));
 
-				const colors = new lakeside.T1013Color();
-				colors.setRed(newColors.red);
-				colors.setGreen(newColors.green);
-				colors.setBlue(newColors.blue);
+				const colors: Message = Object.assign({}, newColors);
 				if (newBrightness !== undefined) {
-					colors.setBrightness(newBrightness);
+					colors.brightness = newBrightness;
 
 					log.verbose('LightBulb.setState', 'Change brightness to', newBrightness);
 				} else {
-					colors.setBrightness(this.state.brightness);
+					colors.brightness = this.state.brightness;
 
 					log.verbose('LightBulb.setState', 'Keep brightness at', this.state.brightness);
 				}
 
-				packet.getBulbinfo().getPacket().getControl().setColor(1);
-				packet.getBulbinfo().getPacket().getControl().setColors(colors);
+				message.bulbinfo.packet.control.color = 1;
+				message.bulbinfo.packet.control.colors = colors;
 			} else {
 				log.verbose('LightBulb.setState', 'No colors');
 
-				const values = new lakeside.BulbValues();
+				const values: Message = {};
 				if (newBrightness !== undefined) {
-					values.setBrightness(newBrightness);
+					values.brightness = newBrightness;
 
 					log.verbose('LightBulb.setState', 'Change brightness to', newBrightness);
 				} else {
-					values.setBrightness(this.state.brightness);
+					values.brightness = this.state.brightness;
 
 					log.verbose('LightBulb.setState', 'Keep brightness at', this.state.brightness);
 				}
 				if (newTemperature !== undefined) {
-					values.setTemperature(newTemperature);
+					values.temperature = newTemperature;
 
 					log.verbose('LightBulb.setState', 'Change temperature to', newTemperature);
 				} else {
-					values.setTemperature(this.state.temperature);
+					values.temperature = this.state.temperature;
 
 					log.verbose('LightBulb.setState', 'Keep temperature at', this.state.temperature);
 				}
 
-				packet.getBulbinfo().getPacket().getControl().setColor(0);
-				packet.getBulbinfo().getPacket().getControl().setValues(values);
+				message.bulbinfo.packet.control.color = 0;
+				message.bulbinfo.packet.control.values = values;
 			}
 		}
 
-		packet.setSequence(await this.getSequence());
-		packet.setCode(this.code);
+		const packet = packetType.encode(message).finish();
 
 		log.verbose('LightBulb.setState', 'Sending packet');
 

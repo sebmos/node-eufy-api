@@ -1,9 +1,9 @@
 import * as bufferpack from 'bufferpack';
+import * as protobuf from 'protobufjs';
 import { TcpSocket } from './tcp-socket';
 import { decryptResponse, encryptPacket } from './encryption';
 import * as log from './log';
 import { RgbColors, HslColors } from './colors';
-const lakeside = require('./lakeside_pb.js');
 
 export enum Model {
 	// plug
@@ -53,11 +53,7 @@ const isPlugOrSwitch = (model: Model): boolean => {
 	return [Model.T1201, Model.T1202, Model.T1203, Model.T1211].indexOf(model) > -1;
 };
 
-// this is a protobuf packet
-export type Packet = any & {
-	serializeBinary: () => Uint8Array;
-	deserializeBinary: (bytes: Uint8Array) => Packet;
-};
+export type Message = { [key: string]: any };
 
 export enum DeviceEvent {
 	CONNECTION_STATE_CHANGED = 'CONNECTION_STATE_CHANGED'
@@ -222,27 +218,16 @@ export abstract class AbstractDevice implements Device {
 	abstract getHslColors(): HslColors;
 	abstract setHslColors(hue: number, saturation: number, lightness: number): Promise<HslColors>;
 
-	private encryptPacket(packet: Packet): Buffer {
-		log.verbose('AbstractDevice.encryptPacket', packet);
-
-		let serializedPacket: Uint8Array;
+	private encryptPacket(packet: Uint8Array): Buffer {
 		try {
-			serializedPacket = packet.serializeBinary();
-		} catch (e) {
-			throw new Error('Error serializing packet: ' + (e.message || 'Unknown'));
-		}
-
-		log.verbose('AbstractDevice.encryptPacket', 'Serialized:', Buffer.from(serializedPacket).toString('hex'));
-
-		try {
-			return encryptPacket(serializedPacket);
+			return encryptPacket(packet);
 		} catch (e) {
 			throw new Error('Error encrypting packet: ' + (e.message || 'Unknown'));
 		}
 	}
 
-	protected async sendPacket(packet: Packet): Promise<void> {
-		log.verbose('AbstractDevice.sendPacket', packet);
+	protected async sendPacket(packet: Uint8Array): Promise<void> {
+		log.verbose('AbstractDevice.sendPacket', Buffer.from(packet).toString('hex'));
 
 		if (!this.isConnected()) {
 			log.verbose('AbstractDevice.sendPacket', 'Not connected - connecting first');
@@ -252,13 +237,13 @@ export abstract class AbstractDevice implements Device {
 
 		const encryptedPacket = this.encryptPacket(packet);
 
-		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
+		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet:', encryptedPacket.toString('hex'));
 
 		await this.socket.send(encryptedPacket);
 	}
 
-	protected async sendPacketWithResponse(packet: Packet): Promise<Packet> {
-		log.verbose('AbstractDevice.sendPacketWithResponse', packet);
+	protected async sendPacketWithResponse(packet: Uint8Array): Promise<Message> {
+		log.verbose('AbstractDevice.sendPacketWithResponse', Buffer.from(packet).toString('hex'));
 
 		if (!this.isConnected()) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Not connected - connecting first');
@@ -268,7 +253,7 @@ export abstract class AbstractDevice implements Device {
 
 		const encryptedPacket = this.encryptPacket(packet);
 
-		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet');
+		log.verbose('AbstractDevice.sendPacket', 'Sending encrypted packet:', encryptedPacket.toString('hex'));
 
 		const response = await this.socket.sendWaitForResponse(encryptedPacket);
 
@@ -287,35 +272,48 @@ export abstract class AbstractDevice implements Device {
 		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet:', serializedPacket.toString('hex'));
 		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet length:', serializedPacket.length);
 
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
+        let packetType: protobuf.Type;
 		if (isWhiteLightBulb(this.model)) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1012Packet');
 
-			return lakeside.T1012Packet.deserializeBinary(serializedPacket);
+			packetType = proto.lookupType('lakeside.T1012Packet');
 		} else if (this.model === Model.T1013) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1013Packet');
 
-			return lakeside.T1013Packet.deserializeBinary(serializedPacket);
+			packetType = proto.lookupType('lakeside.T1013Packet');
 		} else if (isPlugOrSwitch(this.model)) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1201Packet');
 
-			return lakeside.T1201Packet.deserializeBinary(serializedPacket);
+			packetType = proto.lookupType('lakeside.T1201Packet');
 		} else {
 			throw new Error(`Unable to deserialize response for model "${this.model}"`);
 		}
+
+		const decoded = packetType.decode(serializedPacket, packetLength);
+		const parsed = decoded.toJSON();
+
+		log.verbose('AbstractDevice.sendPacketWithResponse', 'Decoded packet:', JSON.stringify(parsed));
+
+		return parsed;
 	}
 
 	protected async getSequence(): Promise<number> {
 		log.verbose('AbstractDevice.getSequence', 'Loading current sequence number');
 
-		const packet = new lakeside.T1012Packet();
-		packet.setSequence(Math.round(Math.random() * 3000000));
-		packet.setCode(this.code);
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
 
-		packet.setPing(new lakeside.Ping());
-		packet.getPing().setType(0);
+		const packetType = proto.lookupType('lakeside.T1012Packet');
+		const packet = packetType.encode({
+			sequence: Math.round(Math.random() * 3000000),
+			code: this.code,
+			ping: {
+				type: 0
+			}
+		}).finish();
 
 		const response = await this.sendPacketWithResponse(packet);
-		const currentSequence = response.getSequence();
+		const currentSequence = response.sequence as number;
 
 		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', currentSequence);
 

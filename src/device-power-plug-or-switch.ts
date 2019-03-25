@@ -1,18 +1,22 @@
-import { AbstractDevice, Packet } from './device-base';
+import * as protobuf from 'protobufjs';
+import { AbstractDevice, Message } from './device-base';
 import { RgbColors, HslColors } from './colors';
 import * as log from './log';
-const lakeside = require('./lakeside_pb.js');
 
 export class PowerPlugOrSwitch extends AbstractDevice {
-	private async getState(): Promise<Packet> {
+	private async getState(): Promise<Message> {
 		log.verbose('PowerPlugOrSwitch.getState', 'Loading current device state');
 
-		const packet = new lakeside.T1201Packet();
-		packet.setSequence(await this.getSequence());
-		packet.setCode(this.code);
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
 
-		packet.setSwitchinfo(new lakeside.SwitchInfo());
-		packet.getSwitchinfo().setType(1);
+		const packetType = proto.lookupType('lakeside.T1201Packet');
+		const packet = packetType.encode({
+			sequence: await this.getSequence(),
+			code: this.code,
+			switchinfo: {
+				type: 1
+			}
+		}).finish();
 
 		log.verbose('PowerPlugOrSwitch.getState', 'Sending request to device');
 
@@ -24,11 +28,7 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 
 		const response = await this.getState();
 
-		this.power = response
-			.getSwitchinfo()
-			.getPacket()
-			.getSwitchstatus()
-			.getPower() === 1;
+		this.power = response.switchinfo.packet.switchstatus.power === 1;
 
 		log.verbose('PowerPlugOrSwitch.loadCurrentState', 'Current power state:', this.power);
 	}
@@ -36,20 +36,23 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 	async setPowerOn(powerOn: boolean): Promise<boolean> {
 		log.verbose('PowerPlugOrSwitch.setPowerOn', 'Change to:', powerOn);
 
-		const packet = new lakeside.T1201Packet();
+		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
 
-		packet.setSwitchinfo(new lakeside.SwitchInfo());
-		packet.getSwitchinfo().setType(0);
-
-		packet.getSwitchinfo().setPacket(new lakeside.SwitchPacket());
-		packet.getSwitchinfo().getPacket().setUnknown1(100);
-
-		packet.getSwitchinfo().getPacket().setSwitchset(new lakeside.SwitchState());
-		packet.getSwitchinfo().getPacket().getSwitchset().setCommand(7);
-		packet.getSwitchinfo().getPacket().getSwitchset().setState(powerOn ? 1 : 0);
-
-		packet.setSequence(await this.getSequence());
-		packet.setCode(this.code);
+		const packetType = proto.lookupType('lakeside.T1201Packet');
+		const packet = packetType.encode({
+			switchinfo: {
+				type: 0,
+				packet: {
+					unknown1: 100,
+					switchset: {
+						command: 7,
+						state: powerOn ? 1 : 0
+					}
+				}
+			},
+			sequence: await this.getSequence(),
+			code: this.code
+		}).finish();
 
 		log.verbose('PowerPlugOrSwitch.setState', 'Sending packet');
 
