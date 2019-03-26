@@ -14,7 +14,7 @@ This project is not developed, supported or endorsed by eufy.
 |T1012|[Lumos Smart Bulb - Tunable White](https://www.amazon.com/dp/B07177X95T?tag=sebmos-20)|Untested|
 |T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)||
 
-All devices listed above should work, since they are supported in /python-lakeside/. Because an error might have occurred during the porting process, some are marked as *untested*.
+All devices listed above should work, since they are supported in _python-lakeside_. Because an error might have occurred during the porting process, some are marked as *untested*.
 
 If you own one of these untested, or any new  devices that aren't listed, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
 
@@ -116,7 +116,7 @@ if (powerPlugOrSwitch.deviceType === DeviceType.SWITCH) {
 }
 ```
 
-#### `Device.on('CONNECTION_STATE_CHANGED', handler: (connected: boolean) => void)`
+#### `Device.on('CONNECTION_STATE_CHANGED', handler: (connected: boolean) => void): void`
 Handler is called each time the connection stops or starts again. It is not necessary call `Device.connect()` to reconnect, since this will be attempted automatically. Calling `Device.disconnect()` removes the event handler.
 
 ```es6
@@ -284,6 +284,20 @@ if (lightBulb.supportsColors()) {
 		console.log('The color is now red:', newColors);
 	});
 }
+```
+
+#### `setLogVerbosity(verbosity: Verbosity): void`
+Loads devices connected to the provided eufy account.
+
+```es6
+import { setLogVerbosity, Verbosity } from 'node-eufy-api';
+
+setLogVerbosity(Verbosity.ALL);
+setLogVerbosity(Verbosity.INFO); # used for CLI
+setLogVerbosity(Verbosity.WARNING);
+setLogVerbosity(Verbosity.ERROR); # used when running [`homebridge-eufy`](https://github.com/sebmos/homebridge-eufy)
+setLogVerbosity(Verbosity.SUCCESS);
+setLogVerbosity(Verbosity.NONE);
 ```
 
 ##  Unsupported

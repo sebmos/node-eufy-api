@@ -5,6 +5,7 @@ import { PowerPlugOrSwitch } from './device-power-plug-or-switch';
 import * as log from './log';
 
 export { Device, DeviceEvent, DeviceType, Model, getTypeForModel } from './device-base';
+export { setLogVerbosity, Verbosity } from './log';
 
 const clientId: string = 'eufyhome-app';
 const clientSecret: string = 'GQCpr9dSp3uQpsOMgJ4xQ';
@@ -29,7 +30,7 @@ export const createDevice = (model: Model | string, code: string, ipAddress: str
 }
 
 export const loadDevices = async (email: string, password: string): Promise<Device[]> => {
-    log.log('Logging in');
+    log.info('Logging in');
 
     const payload: { [key: string]: string } = {
         client_id: clientId,
@@ -57,7 +58,7 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
         throw new Error(JSON.stringify(authJson));
     }
 
-    log.log('Loading devices');
+    log.info('Loading devices');
 
     const devicesResult = await fetch('https://home-api.eufylife.com/v1/device/list/devices-and-groups', {
         headers: {

@@ -195,7 +195,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 };
 
 (async () => {
-	log.setVerboseOutputEnabled(process.argv.slice(2).indexOf('--verbose') > -1);
+	log.setLogVerbosity(process.argv.slice(2).indexOf('--verbose') > -1 ? log.Verbosity.ALL : log.Verbosity.INFO);
 
 	let devices: Device[];
 
