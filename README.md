@@ -19,6 +19,9 @@ All devices listed above should work, since they are supported in _python-lakesi
 If you own one of these untested, or any new  devices that aren't listed, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
 
 ## Usage
+### Homebridge (HomeKit support)
+The [`homebridge-eufy`](https://github.com/sebmos/homebridge-eufy) plugin lets you add HomeKit support for your Eufy (and other) devices. Find out further details on the [plugin page](https://github.com/sebmos/homebridge-eufy).
+
 ### Installation via NPM
 Add the node-eufy-api package to your project:
 ```bash
