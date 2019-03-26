@@ -296,9 +296,9 @@ Loads devices connected to the provided eufy account.
 import { setLogVerbosity, Verbosity } from 'node-eufy-api';
 
 setLogVerbosity(Verbosity.ALL);
-setLogVerbosity(Verbosity.INFO); # used for CLI
+setLogVerbosity(Verbosity.INFO); // used for CLI
 setLogVerbosity(Verbosity.WARNING);
-setLogVerbosity(Verbosity.ERROR); # used when running [`homebridge-eufy`](https://github.com/sebmos/homebridge-eufy)
+setLogVerbosity(Verbosity.ERROR); // used when running homebridge-eufy
 setLogVerbosity(Verbosity.SUCCESS);
 setLogVerbosity(Verbosity.NONE);
 ```
