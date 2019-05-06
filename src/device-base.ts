@@ -15,6 +15,7 @@ export enum Model {
 	// white bulb
 	T1011 = 'T1011',
 	T1012 = 'T1012',
+	T1016 = 'T1016',
 	// color bulb
 	T1013 = 'T1013'
 }
@@ -38,6 +39,7 @@ export const getTypeForModel = (model: Model | string): DeviceType => {
 		case Model.T1011:
 		case Model.T1012:
 		case Model.T1013:
+		case Model.T1016:
 			return DeviceType.LIGHT_BULB;
 
 		default:
@@ -46,7 +48,7 @@ export const getTypeForModel = (model: Model | string): DeviceType => {
 }
 
 export const isWhiteLightBulb = (model: Model): boolean => {
-	return [Model.T1011, Model.T1012].indexOf(model) > -1;
+	return [Model.T1011, Model.T1012, Model.T1016].indexOf(model) > -1;
 };
 
 const isPlugOrSwitch = (model: Model): boolean => {
