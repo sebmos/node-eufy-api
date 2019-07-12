@@ -1,6 +1,6 @@
 {
   "name": "node-eufy-api",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A simple JavaScript API to control eufy smart light bulbs, switches and plugs.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,7 +26,7 @@
     "node": ">=4.0.0"
   },
   "devDependencies": {
-    "@types/inquirer": "0.0.43",
+    "@types/inquirer": "6.0.3",
     "@types/node": "^10.12.18",
     "@types/node-fetch": "^2.1.4",
     "rimraf": "^2.6.3",
@@ -35,7 +35,7 @@
   "dependencies": {
     "bufferpack": "0.0.6",
     "chalk": "^2.4.1",
-    "inquirer": "^6.2.1",
+    "inquirer": "^6.5.0",
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8"
   }

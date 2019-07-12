@@ -46,13 +46,13 @@ const chooseDevice = async (devices: Device[]): Promise<Device> => {
 };
 
 const deviceMenu = async (device: Device): Promise<void> => {
-	const menuOptions: objects.ChoiceOption[] = [{
+	const menuOptions: objects.ChoiceOption<unknown>[] = [{
 		name: `Turn ${device.isPowerOn() ? 'off' : 'on'}`,
 		value: 'power'
 	}];
 
 	if (device.supportsBrightness()) {
-		const brightnessOption: objects.ChoiceOption = {
+		const brightnessOption: objects.ChoiceOption<unknown> = {
 			name: 'Change brightness',
 			value: 'brightness'
 		};
@@ -65,7 +65,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 	}
 
 	if (device.supportsTemperature()) {
-		const temperatureOption: objects.ChoiceOption = {
+		const temperatureOption: objects.ChoiceOption<unknown> = {
 			name: 'Change temperature',
 			value: 'temperature'
 		};
