@@ -72,6 +72,8 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
     if (devicesJson.res_code === 1) {
         let devices: Device[] = [];
         (devicesJson.items || {}).forEach((item: any) => {
+            log.info(`Device found: ${JSON.stringify(item)}`);
+
             if (item.device && item.device.id && item.device.local_code && item.device.wifi && item.device.wifi.lan_ip_addr) {
                 const model: Model = item.device.product.product_code;
 
