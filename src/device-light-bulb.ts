@@ -1,5 +1,12 @@
 import * as protobuf from 'protobufjs';
-import { AbstractDevice, Message, Model, isWhiteLightBulb } from './device-base';
+import {
+	AbstractDevice,
+	Message,
+	Model,
+	isWhiteLightBulb,
+	isColorLightBulb,
+	isLightBulbWithTemperatureSupport
+} from './device-base';
 import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors';
 import * as log from './log';
 
@@ -297,7 +304,7 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	supportsTemperature(): boolean {
-		return [Model.T1012, Model.T1013].indexOf(this.model) > -1;
+		return isLightBulbWithTemperatureSupport(this.model);
 	}
 
 	getTemperature(): number {
@@ -321,7 +328,7 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	supportsColors(): boolean {
-		return [Model.T1013].indexOf(this.model) > -1;
+		return isColorLightBulb(this.model);
 	}
 
 	getRgbColors(): RgbColors {
