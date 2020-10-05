@@ -11,12 +11,17 @@ This project is not developed, supported or endorsed by eufy.
 |T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
 |T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|
 |T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)||
-|T1012|[Lumos Smart Bulb - Tunable White](https://www.amazon.com/dp/B07177X95T?tag=sebmos-20)|Untested|
+|T1012|Lumos Smart Bulb - Tunable White|Untested|
 |T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)||
 
 All devices listed above should work, since they are supported in _python-lakeside_. Because an error might have occurred during the porting process, some are marked as *untested*.
 
 If you own one of these untested, or any new  devices that aren't listed, please consider running the [command-line interface](#command-line-interface) and [open an issue](https://github.com/sebmos/node-eufy-api/issues/new) to confirm whether or not they work.
+
+### Unsupported Devices
+|Device Code|Device Name|
+|--|--|
+|T1015|Lumos Smart Bulb - Tunable White|
 
 ## Usage
 ### Homebridge (HomeKit support)
