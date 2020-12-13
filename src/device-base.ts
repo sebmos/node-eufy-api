@@ -313,7 +313,16 @@ export abstract class AbstractDevice implements Device {
 		}).finish();
 
 		const response = await this.sendPacketWithResponse(packet);
-		const currentSequence = response.sequence as number;
+		let rawSequence = response.sequence;
+		let currentSequence;
+		if (typeof rawSequence === 'string') {
+			currentSequence = parseInt(rawSequence, 10);
+		} else if (typeof rawSequence === 'number') {
+			currentSequence = rawSequence;
+		} else {
+			log.error('Unknown sequence number type');
+			currentSequence = rawSequence as number;
+		}
 
 		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', currentSequence);
 
