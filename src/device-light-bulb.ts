@@ -21,7 +21,7 @@ export class LightBulb extends AbstractDevice {
 		const packet = packetType.encode({
 			sequence: await this.getSequence(),
 			code: this.code,
-			bulbInfo: {
+			bulbinfo: {
 				type: 1
 			}
 		}).finish();
