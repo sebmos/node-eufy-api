@@ -35,7 +35,7 @@
   "dependencies": {
     "bufferpack": "0.0.6",
     "chalk": "^2.4.1",
-    "inquirer": "^6.5.0",
+    "inquirer": "^8.0.0",
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8"
   }
