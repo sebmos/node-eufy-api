@@ -327,7 +327,7 @@ export abstract class AbstractDevice implements Device {
 		log.verbose('AbstractDevice.getSequence', 'Current sequence number:', currentSequence);
 
 		if (currentSequence > 0x80000000) {
-			log.warn('WARNING: There is a bug with Eufy devices that might mean that your device will disconnect! For further information, go: https://github.com/sebmos/node-eufy-api/issues');
+			log.error('WARNING: There is a firmware bug your device that means that it will disconnect! There is no known workaround for this.');
 		}
 
 		return currentSequence + 1;
