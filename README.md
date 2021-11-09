@@ -3,6 +3,12 @@ A simple JavaScript API to control [eufy's](https://www.eufylife.com/) smart lig
 
 This project is not developed, supported or endorsed by eufy.
 
+## 🛑 Warning: Eufy firmware bug
+
+This package does not work reliable for all devices due to a firmware bug, which means the device will, when receiving a message via your local network, simply close the connection.
+
+There is no known workaround for this problem.
+
 ## Supported Devices
 |Device Code|Device Name|Comment|
 |--|--|--|
