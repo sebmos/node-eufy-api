@@ -5,11 +5,10 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "prepublishOnly": "npm run build:clean && npm run build",
-    "build:clean": "./node_modules/rimraf/bin.js ./lib/ .credentials",
-    "build:proto": "cp ./src/lakeside.proto ./lib/",
-    "build:tsc": "./node_modules/.bin/tsc",
-    "build": "npm run build:tsc && npm run build:proto",
+    "prepublishOnly": "npm run clean && npm run build",
+    "clean": "rimraf ./lib/ .credentials",
+    "prebuild": "copyfiles -u 1 ./src/lakeside.proto ./lib/",
+    "build": "tsc",
     "cli": "node lib/cli.js",
     "cli:verbose": "node lib/cli.js --verbose"
   },
@@ -35,6 +34,7 @@
   "dependencies": {
     "bufferpack": "0.0.6",
     "chalk": "^2.4.1",
+    "copyfiles": "^2.4.1",
     "inquirer": "^8.0.0",
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8"
