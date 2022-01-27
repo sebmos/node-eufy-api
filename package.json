@@ -4,6 +4,9 @@
   "description": "A simple JavaScript API to control eufy smart light bulbs, switches and plugs.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "bin": {
+    "eufy": "lib/cli.js"
+  },
   "scripts": {
     "prepublishOnly": "npm run clean && npm run build",
     "clean": "rimraf ./lib/ .credentials",
