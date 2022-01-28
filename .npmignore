@@ -1,4 +1,5 @@
 .idea/
+.nova/
 node_modules/
 src/
 .credentials
