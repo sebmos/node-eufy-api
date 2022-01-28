@@ -1,8 +1,11 @@
 import chalk from 'chalk';
-import { saveCredentials, loadCredentials, deleteCredentials } from './credentials-cache';
-import { prompt, objects } from 'inquirer';
-import { loadDevices, Device } from './index';
-import * as log from './log';
+import { saveCredentials, loadCredentials, deleteCredentials } from './credentials-cache.js';
+import inquirer from 'inquirer';
+import { ListChoiceOptions } from 'inquirer';
+import { loadDevices, Device } from './index.js';
+import * as log from './log.js';
+
+const { prompt } = inquirer;
 
 const startMenu = async (devices: Device[]) => {
 	const device = await chooseDevice(devices);
@@ -46,13 +49,13 @@ const chooseDevice = async (devices: Device[]): Promise<Device> => {
 };
 
 const deviceMenu = async (device: Device): Promise<void> => {
-	const menuOptions: objects.ChoiceOption<unknown>[] = [{
+	const menuOptions: ListChoiceOptions[] = [{
 		name: `Turn ${device.isPowerOn() ? 'off' : 'on'}`,
 		value: 'power'
 	}];
 
 	if (device.supportsBrightness()) {
-		const brightnessOption: objects.ChoiceOption<unknown> = {
+		const brightnessOption: ListChoiceOptions = {
 			name: 'Change brightness',
 			value: 'brightness'
 		};
@@ -65,7 +68,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 	}
 
 	if (device.supportsTemperature()) {
-		const temperatureOption: objects.ChoiceOption<unknown> = {
+		const temperatureOption: ListChoiceOptions = {
 			name: 'Change temperature',
 			value: 'temperature'
 		};
@@ -90,7 +93,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 		value: 'exit'
 	});
 
-	const action = await prompt<string>([{
+	const { action } = await prompt([{
 		type: 'list',
 		name: 'action',
 		message: 'Options',
@@ -161,7 +164,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				type: 'input',
 				name: 'newColors',
 				message: 'Enter color values in the format "{red}/{green}/{blue}" (each number between 0 and 255)',
-				validate: value => {
+				validate: (value: string) => {
 					const colors = value.split('/');
 					if (colors.length !== 3) {
 						return 'Please provide the three values separated with a "\"';

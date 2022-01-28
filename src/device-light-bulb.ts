@@ -1,7 +1,7 @@
-import * as protobuf from 'protobufjs';
-import { AbstractDevice, Message, Model, isWhiteLightBulb } from './device-base';
-import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors';
-import * as log from './log';
+import protobuf from 'protobufjs';
+import { AbstractDevice, Message, Model, isWhiteLightBulb, getProto } from './device-base.js';
+import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors.js';
+import * as log from './log.js';
 
 interface BulbState {
 	brightness: number;
@@ -15,8 +15,7 @@ export class LightBulb extends AbstractDevice {
 	private async getState(): Promise<Message> {
 		log.verbose('LightBulb.getState', 'Loading current device state');
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
-
+		const proto = await getProto();
 		const packetType = proto.lookupType('lakeside.T1012Packet');
 		const packet = packetType.encode({
 			sequence: await this.getSequence(),
@@ -141,7 +140,7 @@ export class LightBulb extends AbstractDevice {
 			log.verbose('LightBulb.setState', 'Colors:', JSON.stringify(newColors));
 		}
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
+		const proto = await getProto();
 		let message: Message = {
 			sequence: await this.getSequence(),
 			code: this.code

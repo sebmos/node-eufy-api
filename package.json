@@ -31,7 +31,7 @@
     "node": ">=12.0.0"
   },
   "devDependencies": {
-    "@types/inquirer": "6.0.3",
+    "@types/inquirer": "8.2.0",
     "esbuild": "^0.14.14",
     "rimraf": "^2.6.3",
     "typescript": "^4.5.5"
@@ -40,7 +40,7 @@
     "bufferpack": "0.0.6",
     "chalk": "^5.0.0",
     "copyfiles": "^2.4.1",
-    "inquirer": "^8.0.0",
+    "inquirer": "^8.2.0",
     "node-fetch": "^3.2.0",
     "protobufjs": "^6.8.8"
   }

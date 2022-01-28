@@ -4,6 +4,7 @@
 		"outDir": "lib",
 		"target": "es2015",
 		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
 		"declaration": true,
 		"strictNullChecks": true,
 		"noImplicitAny": true,

@@ -1,5 +1,5 @@
 import { Socket, createConnection, isIP } from 'net';
-import * as log from './log';
+import * as log from './log.js';
 
 export class TcpSocket {
 	private ipAddress: string;

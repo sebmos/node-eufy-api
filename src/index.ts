@@ -1,11 +1,12 @@
 import fetch from 'node-fetch';
-import { Device, DeviceType, Model, getTypeForModel } from './device-base';
-import { LightBulb } from './device-light-bulb';
-import { PowerPlugOrSwitch } from './device-power-plug-or-switch';
-import * as log from './log';
+import { Device, DeviceType, Model, getTypeForModel } from './device-base.js';
+import { LightBulb } from './device-light-bulb.js';
+import { PowerPlugOrSwitch } from './device-power-plug-or-switch.js';
+import * as log from './log.js';
 
-export { Device, DeviceEvent, DeviceType, Model, getTypeForModel } from './device-base';
-export { setLogVerbosity, Verbosity } from './log';
+export type { Device };
+export { DeviceEvent, DeviceType, Model, getTypeForModel } from './device-base.js';
+export { setLogVerbosity, Verbosity } from './log.js';
 
 const clientId: string = 'eufyhome-app';
 const clientSecret: string = 'GQCpr9dSp3uQpsOMgJ4xQ';

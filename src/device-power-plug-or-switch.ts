@@ -1,14 +1,12 @@
-import * as protobuf from 'protobufjs';
-import { AbstractDevice, Message } from './device-base';
-import { RgbColors, HslColors } from './colors';
-import * as log from './log';
+import { AbstractDevice, Message, getProto } from './device-base.js';
+import { RgbColors, HslColors } from './colors.js';
+import * as log from './log.js';
 
 export class PowerPlugOrSwitch extends AbstractDevice {
 	private async getState(): Promise<Message> {
 		log.verbose('PowerPlugOrSwitch.getState', 'Loading current device state');
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
-
+		const proto = await getProto();
 		const packetType = proto.lookupType('lakeside.T1201Packet');
 		const packet = packetType.encode({
 			sequence: await this.getSequence(),
@@ -36,8 +34,7 @@ export class PowerPlugOrSwitch extends AbstractDevice {
 	async setPowerOn(powerOn: boolean): Promise<boolean> {
 		log.verbose('PowerPlugOrSwitch.setPowerOn', 'Change to:', powerOn);
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
-
+		const proto = await getProto();
 		const packetType = proto.lookupType('lakeside.T1201Packet');
 		const packet = packetType.encode({
 			switchinfo: {

@@ -1,9 +1,9 @@
-import * as bufferpack from 'bufferpack';
-import * as protobuf from 'protobufjs';
-import { TcpSocket } from './tcp-socket';
-import { decryptResponse, encryptPacket } from './encryption';
-import * as log from './log';
-import { RgbColors, HslColors } from './colors';
+import bufferpack from 'bufferpack';
+import protobuf from 'protobufjs';
+import { TcpSocket } from './tcp-socket.js';
+import { decryptResponse, encryptPacket } from './encryption.js';
+import * as log from './log.js';
+import { RgbColors, HslColors } from './colors.js';
 
 export enum Model {
 	// plug
@@ -52,6 +52,10 @@ export const isWhiteLightBulb = (model: Model): boolean => {
 const isPlugOrSwitch = (model: Model): boolean => {
 	return [Model.T1201, Model.T1202, Model.T1203, Model.T1211].indexOf(model) > -1;
 };
+
+export const getProto = async () => {
+	return await protobuf.load(`./lib/lakeside.proto`);
+}
 
 export type Message = { [key: string]: any };
 
@@ -272,7 +276,7 @@ export abstract class AbstractDevice implements Device {
 		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet:', serializedPacket.toString('hex'));
 		log.verbose('AbstractDevice.sendPacketWithResponse', 'Serialized packet length:', serializedPacket.length);
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
+		const proto = await getProto();
         let packetType: protobuf.Type;
 		if (isWhiteLightBulb(this.model)) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1012Packet');
@@ -301,8 +305,7 @@ export abstract class AbstractDevice implements Device {
 	protected async getSequence(): Promise<number> {
 		log.verbose('AbstractDevice.getSequence', 'Loading current sequence number');
 
-		const proto = await protobuf.load(`${__dirname}/lakeside.proto`);
-
+		const proto = await getProto();
 		const packetType = proto.lookupType('lakeside.T1012Packet');
 		const packet = packetType.encode({
 			sequence: Math.round(Math.random() * 3000000),
