@@ -115,7 +115,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				message: 'Enter brightness (between 0 and 100)',
 				validate: (value: string) => {
 					const number = parseInt(value, 10);
-					if (number === NaN || number < 0 || number > 100) {
+					if (isNaN(number) || number < 0 || number > 100) {
 						return 'Please enter a number between 0 and 100';
 					} else {
 						return true;
@@ -139,7 +139,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 				message: 'Enter color temperature (between 0 and 100)',
 				validate: (value: string) => {
 					const number = parseInt(value, 10);
-					if (number === NaN || number < 0 || number > 100) {
+					if (isNaN(number) || number < 0 || number > 100) {
 						return 'Please enter a number between 0 and 100';
 					} else {
 						return true;
@@ -167,7 +167,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 						return 'Please provide the three values separated with a "\"';
 					} else if (colors.find((color: string) => {
 						const number = parseInt(color, 10);
-						return number === NaN || number < 0 || number > 255;
+						return isNaN(number) || number < 0 || number > 255;
 					})) {
 						return 'The numbers should be between 0 and 255';
 					} else {
