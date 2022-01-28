@@ -47,7 +47,7 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
         }
     );
 
-    const authJson = await authResult.json();
+    const authJson = await authResult.json() as any;
 
     let accessToken: string;
     if (authJson.res_code === 1) {
@@ -67,7 +67,7 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
         }
     });
 
-    const devicesJson = await devicesResult.json();
+    const devicesJson = await devicesResult.json() as any;
 
     if (devicesJson.res_code === 1) {
         let devices: Device[] = [];

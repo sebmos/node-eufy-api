@@ -32,17 +32,16 @@
   "devDependencies": {
     "@types/inquirer": "6.0.3",
     "@types/node": "^10.12.18",
-    "@types/node-fetch": "^2.1.4",
     "esbuild": "^0.14.14",
     "rimraf": "^2.6.3",
-    "typescript": "^3.2.2"
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "bufferpack": "0.0.6",
     "chalk": "^2.4.1",
     "copyfiles": "^2.4.1",
     "inquirer": "^8.0.0",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^3.2.0",
     "protobufjs": "^6.8.8"
   }
 }
