@@ -90,7 +90,7 @@ const deviceMenu = async (device: Device): Promise<void> => {
 		value: 'exit'
 	});
 
-	const { action } = await prompt([{
+	const action = await prompt<string>([{
 		type: 'list',
 		name: 'action',
 		message: 'Options',

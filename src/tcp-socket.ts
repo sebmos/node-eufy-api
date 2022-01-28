@@ -72,9 +72,9 @@ export class TcpSocket {
 	}
 
 	async disconnect(): Promise<void> {
-		await new Promise(resolve => {
+		return await new Promise(resolve => {
 			if (this.connected && this.socket) {
-				this.socket.end(resolve);
+				this.socket.end(() => resolve());
 			} else {
 				resolve();
 			}
@@ -82,9 +82,9 @@ export class TcpSocket {
 	}
 
 	async send(message: Buffer): Promise<void> {
-		await new Promise((resolve, reject) => {
+		return await new Promise((resolve, reject) => {
 			if (this.socket) {
-				this.socket.write(message, resolve);
+				this.socket.write(message, () => resolve());
 			} else {
 				reject(new Error('Socket isn\'t running, please call connect()'));
 			}

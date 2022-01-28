@@ -5,13 +5,13 @@ const CREDENTIALS_FILE_NAME = '.credentials';
 export const loadCredentials = async (): Promise<{ email: string, password: string } | undefined> => {
 	return new Promise((resolve, reject) => {
 		if (!existsSync(CREDENTIALS_FILE_NAME)) {
-			return resolve();
+			return resolve(undefined);
 		}
 
 		readFile(
 			CREDENTIALS_FILE_NAME,
 			'utf8',
-			(err?: Error, data?: string) => {
+			(err: Error | null, data: string) => {
 				if (err) {
 					reject(err);
 				} else if (data) {
@@ -21,7 +21,7 @@ export const loadCredentials = async (): Promise<{ email: string, password: stri
 						reject(e);
 					}
 				} else {
-					resolve();
+					resolve(undefined);
 				}
 			}
 		);
@@ -34,7 +34,7 @@ export const saveCredentials = async (email: string, password: string): Promise<
 			CREDENTIALS_FILE_NAME,
 			JSON.stringify({ email, password }),
 			'utf8',
-			(err?: Error) => {
+			(err: Error | null) => {
 				if (err) {
 					return reject(err);
 				} else {
@@ -49,7 +49,7 @@ export const deleteCredentials = async (): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		unlink(
 			CREDENTIALS_FILE_NAME,
-			(err?: Error) => {
+			(err: Error | null) => {
 				if (err) {
 					return reject(err);
 				} else {

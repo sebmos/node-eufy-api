@@ -31,10 +31,9 @@
   },
   "devDependencies": {
     "@types/inquirer": "6.0.3",
-    "@types/node": "^10.12.18",
     "esbuild": "^0.14.14",
     "rimraf": "^2.6.3",
-    "typescript": "^3.4.5"
+    "typescript": "^4.5.5"
   },
   "dependencies": {
     "bufferpack": "0.0.6",
