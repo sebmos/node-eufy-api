@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "bufferpack": "0.0.6",
-    "chalk": "^2.4.1",
+    "chalk": "^5.0.0",
     "copyfiles": "^2.4.1",
     "inquirer": "^8.0.0",
     "node-fetch": "^3.2.0",

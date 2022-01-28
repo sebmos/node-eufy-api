@@ -32,7 +32,7 @@ export const info = (message: any, ...optionalParams: any[]) => {
 
 export const warn = (message: any, ...optionalParams: any[]) => {
 	if (logVerbosity <= Verbosity.WARNING) {
-		custom(chalk.keyword('orange')(message, ...optionalParams));
+		custom(chalk.cyan(message, ...optionalParams));
 	}
 };
 
