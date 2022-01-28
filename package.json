@@ -7,12 +7,13 @@
   "bin": {
     "eufy": "lib/cli.js"
   },
+  "type": "module",
   "scripts": {
     "prepublishOnly": "npm run clean && npm run build",
     "clean": "rimraf ./lib/ .credentials",
     "prebuild": "copyfiles -u 1 ./src/lakeside.proto ./lib/",
     "build:typings": "tsc --emitDeclarationOnly",
-    "build:js": "esbuild src/*.ts --outdir=lib --platform=node",
+    "build:js": "esbuild src/*.ts --outdir=lib --platform=node --target=node12",
     "build": "npm run build:typings && npm run build:js",
     "cli": "node lib/cli.js",
     "cli:verbose": "node lib/cli.js --verbose"
@@ -27,7 +28,7 @@
     "url": "http://github.com/sebmos/node-eufy-api/issues"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=12.0.0"
   },
   "devDependencies": {
     "@types/inquirer": "6.0.3",
