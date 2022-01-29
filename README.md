@@ -19,6 +19,7 @@ There is no known workaround for this problem.
 |T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)||
 |T1012|Lumos Smart Bulb - Tunable White|Untested|
 |T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)||
+|T1018|Lumos Smart Bulb 2.0 Lite - White & Color||
 
 All devices listed above should work, since they are supported in _python-lakeside_. Because an error might have occurred during the porting process, some are marked as *untested*.
 

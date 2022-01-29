@@ -16,7 +16,8 @@ export enum Model {
 	T1011 = 'T1011',
 	T1012 = 'T1012',
 	// color bulb
-	T1013 = 'T1013'
+	T1013 = 'T1013',
+	T1018 = 'T1018'
 }
 
 export enum DeviceType {
@@ -38,6 +39,7 @@ export const getTypeForModel = (model: Model | string): DeviceType => {
 		case Model.T1011:
 		case Model.T1012:
 		case Model.T1013:
+		case Model.T1018:
 			return DeviceType.LIGHT_BULB;
 
 		default:
@@ -47,6 +49,10 @@ export const getTypeForModel = (model: Model | string): DeviceType => {
 
 export const isWhiteLightBulb = (model: Model): boolean => {
 	return [Model.T1011, Model.T1012].indexOf(model) > -1;
+};
+
+export const isColorLightBulb = (model: Model): boolean => {
+	return [Model.T1013, Model.T1018].indexOf(model) > -1;
 };
 
 const isPlugOrSwitch = (model: Model): boolean => {
@@ -282,7 +288,7 @@ export abstract class AbstractDevice implements Device {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1012Packet');
 
 			packetType = proto.lookupType('lakeside.T1012Packet');
-		} else if (this.model === Model.T1013) {
+		} else if (isColorLightBulb(this.model)) {
 			log.verbose('AbstractDevice.sendPacketWithResponse', 'Deserializing response as T1013Packet');
 
 			packetType = proto.lookupType('lakeside.T1013Packet');

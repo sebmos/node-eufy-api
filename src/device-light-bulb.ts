@@ -1,5 +1,5 @@
 import protobuf from 'protobufjs';
-import { AbstractDevice, Message, Model, isWhiteLightBulb, getProto } from './device-base.js';
+import { AbstractDevice, Message, Model, isWhiteLightBulb, isColorLightBulb, getProto } from './device-base.js';
 import { RgbColors, rgb2hsl, HslColors, hsl2rgb } from './colors.js';
 import * as log from './log.js';
 
@@ -296,7 +296,7 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	supportsTemperature(): boolean {
-		return [Model.T1012, Model.T1013].indexOf(this.model) > -1;
+		return [Model.T1012, Model.T1013, Model.T1018].indexOf(this.model) > -1;
 	}
 
 	getTemperature(): number {
@@ -320,7 +320,7 @@ export class LightBulb extends AbstractDevice {
 	}
 
 	supportsColors(): boolean {
-		return [Model.T1013].indexOf(this.model) > -1;
+		return isColorLightBulb(this.model);
 	}
 
 	getRgbColors(): RgbColors {
