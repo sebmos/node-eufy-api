@@ -12,13 +12,13 @@ There is no known workaround for this problem.
 ## Supported Devices
 |Device Code|Device Name|Comment|
 |--|--|--|
-|T1201|[Smart Plug](https://www.amazon.com/dp/B071J5DW8N?tag=sebmos-20)||
-|T1202|[Smart Plug Mini](https://www.amazon.com/dp/B07177XC24?tag=sebmos-20)||
-|T1203|[Smart WiFi Plug (UK)](https://www.amazon.co.uk/gp/product/B07B8XDZ6L?tag=sebmos0d-21)||
-|T1211|[Smart Light Switch](https://www.amazon.com/dp/B071SJ977G?tag=sebmos-20)|Untested|
-|T1011|[Lumos Smart Bulb - White](https://www.amazon.co.uk/gp/product/B075J92B39?tag=sebmos0d-21)||
+|T1201|Smart Plug||
+|T1202|Smart Plug Mini||
+|T1203|Smart WiFi Plug (UK)||
+|T1211|Smart Light Switch|Untested|
+|T1011|Lumos Smart Bulb - White||
 |T1012|Lumos Smart Bulb - Tunable White|Untested|
-|T1013|[Lumos Smart Bulb - White & Color](https://www.amazon.com/dp/B072FS6YL7?tag=sebmos-20)||
+|T1013|Lumos Smart Bulb - White & Color||
 
 All devices listed above should work, since they are supported in _python-lakeside_. Because an error might have occurred during the porting process, some are marked as *untested*.
 
@@ -28,6 +28,7 @@ If you own one of these untested, or any new  devices that aren't listed, please
 |Device Code|Device Name|
 |--|--|
 |T1015|Lumos Smart Bulb - Tunable White|
+|T1018|Lumos Smart Bulb 2.0 Lite - White & Color|
 
 ## Usage
 ### Homebridge (HomeKit support)
