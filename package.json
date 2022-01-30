@@ -7,7 +7,6 @@
   "bin": {
     "eufy": "lib/cli.js"
   },
-  "type": "module",
   "scripts": {
     "prepublishOnly": "npm run clean && npm run build",
     "clean": "rimraf ./lib/ .credentials",
