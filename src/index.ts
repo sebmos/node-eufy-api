@@ -24,7 +24,7 @@ export const createDevice = (model: Model | string, code: string, ipAddress: str
             break;
 
         default:
-            throw new Error('Could not find devic');
+            throw new Error('Could not find device');
     }
 
     return new deviceClass(model as Model, code, ipAddress, name);
@@ -73,15 +73,15 @@ export const loadDevices = async (email: string, password: string): Promise<Devi
     if (devicesJson.res_code === 1) {
         let devices: Device[] = [];
         (devicesJson.items || {}).forEach((item: any) => {
-            if (item.device && item.device.id && item.device.local_code && item.device.wifi && item.device.wifi.lan_ip_addr) {
-                const model: Model = item.device.product.product_code;
+            if (item.device?.id && item.device?.local_code && item.device?.wifi?.lan_ip_addr) {
+                const model: Model = item.device?.product?.product_code;
 
                 try {
                     devices.push(createDevice(
                         model,
                         item.device.local_code,
                         item.device.wifi.lan_ip_addr,
-                        item.device.alias_name || item.device.name
+                        item.device?.alias_name || item.device?.name
                     ));
                 } catch {
                     log.error(`Unknown device model "${model}"`);
